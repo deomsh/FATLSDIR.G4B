@@ -13,9 +13,9 @@ DEVICE = (fd#), (hd#,#), (0x#) or (#); with ISO/UDF CD/DVD too
 /PATH/ accepts ONE wildcard: '*' at END of NAME[.EXT] in LAST directory  
 FILE = DIR specified file => on root without DEVICE and/or /PATH/ **  
 FILE accepts wildcard: '*' in END of Name & END of Extension (NOT: '?' )  
-_*  Default verbose DIR: DIR & output messages too  
-** FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)  
-** Without FILE full directory will be shown (*.* is NOT needed)  
+1* Default verbose DIR: DIR & output messages too  
+2* FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)  
+2* Without FILE full directory will be shown (*.* is NOT needed)  
 3* FAT-DIR parsing needs 0x1000 total memory (2MB) - LS-DIR 0x200 (512KB)  
 3* Lowest value 0x3000 - forbidden: 0x3001-0xD460 and 0x12000-0x12FFF  
 File versions: Grubutil FAT and Grub4Dos 0.4.6a, Grub4dos for UEFI (watch FAT!)  
@@ -31,8 +31,8 @@ General switches: /s[:n] /o:d|f /b /w:[n] /p /q /[-]x:~ /[-]y:DIR
 /q = quiet DIR: error messages & last file-count message only (not: /b or /w)  
 /[-]x:~ = only SFN-equivalent of LFN/real shortened LFN will [not] be shown **  
 /[-]y:DIR = only PATH [not]containing DIR parsed - accepts '*'-wildcard 3*  
-*  Checks for graphicsmode 3/ 640x480 (80 chars on one screen-line needed)  
-** Instead of '~' MAX 16 other characters can be used too (special feature)  
+1* Checks for graphicsmode 3/ 640x480 (80 chars on one screen-line needed)  
+2* Instead of '~' MAX 16 other characters can be used too (special feature)  
 3* DIR is last directory in PATH - [-]DIR max 16 chars, later parts of PATH too  
 3* Can be combined with '*' at end of last DIR in PATH to check chars after '*'  
 
@@ -41,10 +41,10 @@ FAT Directory Parser Switches: /a:[-]darsh /l /f /sfn[:]@ *
 /l = all PATH & FILE output in /l => lowercase (default uppercase)  
 /f = do not parse empty subdirectories  
 /sfn[:]@ = show external saved LFN's for 'tilded' SFN-files/SFN-directories 3*  
-*  Default - no DIR on NTFS, ISO-9660, UDF, EXFAT, EXT2/3/4 & ReIseR(2)fs  
-*  If supported non-FAT file-system found: auto-switching to /ls-mode  
-*  About max 36 000 files AND max 3 000 subdirectories in one directory  
-** Attributes are not shown by FAT - only [not]parsed  
+1* Default - no DIR on NTFS, ISO-9660, UDF, EXFAT, EXT2/3/4 & ReIseR(2)fs  
+1* If supported non-FAT file-system found: auto-switching to /ls-mode  
+1* About max 36 000 files AND max 3 000 subdirectories in one directory  
+2* Attributes are not shown by FAT - only [not]parsed  
 3* Long File Names saved by FATCOPY.G4B /sfn:@ (mixed-case SFN's not), no /b /w  
 
 LS Directory Parser Switches: /lfn|/sfn /a:[-]d /l|u /f /$ /l+f *  
@@ -55,10 +55,10 @@ LS Directory Parser Switches: /lfn|/sfn /a:[-]d /l|u /f /$ /l+f *
 /f = do not parse empty subdirectories (NOT working on NTFS!)  
 /$ = parse NTFS $-(meta)files/directories (default is skipped) 3*  
 /l+f = parse directory lost+found on Ext2/3/4/ReIseR(2)fs etc. 3*  
-*  About max 10 000 8+3 files/ subdirectories in one directory  
-*  Parses FAT, NTFS, ISO-9660, UDF, EXFAT, Ext2/3/4 & ReIseR(2)fs etc.  
-*  Case-sensitive in PATH/FILE and /[-]x: and /[-]y: with EXT2/3/4/ReIseR(2)fs  
-** LFN in PATH/FILE with spaces between "quotes" or use escaped '\ ' ('\=' too)  
+1* About max 10 000 8+3 files/ subdirectories in one directory  
+1* Parses FAT, NTFS, ISO-9660, UDF, EXFAT, Ext2/3/4 & ReIseR(2)fs etc.  
+1* Case-sensitive in PATH/FILE and /[-]x: and /[-]y: with EXT2/3/4/ReIseR(2)fs  
+2* LFN in PATH/FILE with spaces between "quotes" or use escaped '\ ' ('\=' too)  
 3* (Self-declared) Experts only! $-(meta)files can grow above 4GB  
 
 Special Switches: /nocase /dirsize:n /maxfiles:N /maxbyte:n /size:n  
@@ -68,7 +68,7 @@ Special Switches: /nocase /dirsize:n /maxfiles:N /maxbyte:n /size:n
 /maxfiles:N = max total number of files parsed - takes 'Nk' & 'Nm' too  
 /maxbyte:n = max total bytes parsed - takes 'nk' bytes and 'nm' bytes too  
 /size:n = only files with filesize 'n' bytes showed - takes 'nk/nm' bytes too *  
-*  /a:-d is auto-set (not working with: /a:[-]d[-]a[-]r[-]s[-]h and /a:[-]d)  
+1* /a:-d is auto-set (not working with: /a:[-]d[-]a[-]r[-]s[-]h and /a:[-]d)  
 
 Remark: Grud4dos for UEFI soon 'out of malloc memory' (latest version 20240901)  
 
