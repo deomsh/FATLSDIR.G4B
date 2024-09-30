@@ -111,6 +111,7 @@ Uses of switch /w (length of line 80 chars only - textmode or 640x480)
 
 ![FATLSDIR G4B use of wide (-w) and -s II](https://github.com/user-attachments/assets/4e020ff3-162b-4218-8377-b7fe00a1bbaa)
 
+![FATLSDIR G4B use of wide (-w) and -s and -lfn III](https://github.com/user-attachments/assets/7fcb65d4-fb95-47ac-ae16-61cd253b0b34)
 
 
 
