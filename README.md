@@ -107,3 +107,10 @@ FAT and ls directory parsing on ROOT (switch /lfn needed on fat only)
 
 ![FATLSDIR G4B use on root, with -s, and -s   -lfn on FAT12 I](https://github.com/user-attachments/assets/160f42c4-cb44-4c59-af7d-63b77bc3aff8)
 
+Uses of switch /w (length of line 80 chars only - textmode or 640x480)
+
+![FATLSDIR G4B use of wide (-w) and -s II](https://github.com/user-attachments/assets/4e020ff3-162b-4218-8377-b7fe00a1bbaa)
+
+
+
+
