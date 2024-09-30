@@ -68,6 +68,7 @@ Special Switches: /nocase /dirsize:n /maxfiles:N /maxbyte:n /size:n
 *  /a:-d is auto-set (not working with: /a:[-]d[-]a[-]r[-]s[-]h and /a:[-]d)  
 
 Remarks:  
+Pressing key 'Escape' can be used to interrupt parsing
 File versions: Grubutil FAT and Grub4Dos 0.4.6a, Grub4dos for UEFI (watch FAT!)  
 Found not compatible with Grub4Dos 0.4.5b / Grub4Dos 0.4.5c / Grub4efi textmode  
 FAT needed, searched in %^~dp0, (bd), ROOT: /, /boot/grub/, /grub/ and /g4dll/  
