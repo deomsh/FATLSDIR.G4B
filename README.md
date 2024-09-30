@@ -103,6 +103,7 @@ First published version
 
 ### SCREENSHOTS
 
-Basic use on ROOT (if FATLSDIR.G4B is on ROOT too)
+FAT and ls directory parsing on ROOT (switch /lfn needed on fat only)
 
-![FATLSDIR G4B use on root, with -s, -b and -s -b too I](https://github.com/user-attachments/assets/94024f84-7404-49dc-a807-0de2aa7e773c)
+![FATLSDIR G4B use on root, with -s, and -s   -lfn on FAT12 I](https://github.com/user-attachments/assets/160f42c4-cb44-4c59-af7d-63b77bc3aff8)
+
