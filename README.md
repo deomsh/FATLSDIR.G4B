@@ -117,4 +117,6 @@ More advanced use of switch /s with /s:n (max directory depth is 18 directories)
 
 ![FATLSDIR G4B use of wide (-w) and -s=1 and -s=2 and -lfn IV](https://github.com/user-attachments/assets/2d151c06-2153-4735-a6f5-f1d5e1d757f6)
 
+Use of switch /b
+
 
