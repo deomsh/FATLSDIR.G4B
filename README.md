@@ -84,7 +84,7 @@ Example FATLSDIR.G4B (hd0,0)/WINDOWS/*.EXE
 Example FATLSDIR.G4B (hd0,0)/WINDOWS/MS*.DLL /s  
 Example FATLSDIR.G4B (hd0,0)/WINDOWS/SYS*/*.vxd  
 Example FATLSDIR.G4B (hd0,0)/WINDOWS/ /-y:SYSTEM /s  
-Example FATLSDIR.G4B (hd0,0)/PROGRA'~1/ /s:2 /x:~  
+Example FATLSDIR.G4B (hd0,0)/PROGRA~1/ /s:2 /x:~  
 Example FATLSDIR.G4B (hd2,4)/ /s /sfn:@  
 Example FATLSDIR.G4B (hd0,0) /a:hr /s /f  
 Example FATLSDIR.G4B (0xe0) /sfn /s  
