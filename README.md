@@ -4,32 +4,29 @@ Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'
 FATLSDIR.G4B [--mdbase=sector] [DEVICE][/PATH/][FILE] switches  
 FATLSDIR.G4B /? (this screen)  
 DIR files on DEVICE. If DEVICE and/or PATH omitted: on ROOT  
-DIR on hidden partitions too! *  
+DIR on hidden partitions too! 1*  
 On FAT partitions: default 8+3 File Names (or use /lfn[:]case, see there)  
 Arguments space-separated! Switches: lower/uppercase free  
---mdbase=sector changes (md)-startsector in use (default=0x3000) 3*  
+--mdbase=sector changes (md)-startsector in use (default=0x3000) 2*  
 DEVICE = (fd#), (hd#,#), (0x#) or (#); with ISO/UDF CD/DVD too  
 /PATH/ = starting directory => without DEVICE => on root (PATH/ okay)  
 /PATH/ accepts ONE wildcard: '*' at END of NAME[.EXT] in LAST directory  
-FILE = DIR specified file => on root without DEVICE and/or /PATH/ **  
+FILE = DIR specified file => on root without DEVICE and/or /PATH/ 3*  
 FILE accepts wildcard: '*' in END of Name & END of Extension (NOT: '?' )  
 1* Default verbose DIR: DIR & output messages too  
-2* FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)  
-2* Without FILE full directory will be shown (*.* is NOT needed)  
-3* FAT-DIR parsing needs 0x1000 total memory (2MB) - LS-DIR 0x200 (512KB)  
-3* Lowest value 0x3000 - forbidden: 0x3001-0xD460 and 0x12000-0x12FFF  
-File versions: Grubutil FAT and Grub4Dos 0.4.6a, Grub4dos for UEFI (watch FAT!)  
-Found not compatible with Grub4Dos 0.4.5b / Grub4Dos 0.4.5c / Grub4efi textmode  
-FAT needed, searched in %^~dp0, (bd), ROOT: /, /boot/grub/, /grub/ and /g4dll/  
+2* FAT-DIR parsing needs 0x1000 total memory (2MB) - LS-DIR 0x200 (512KB)  
+2* Lowest value 0x3000 - forbidden: 0x3001-0xD460 and 0x12000-0x12FFF  
+3* FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)  
+3* Without FILE full directory will be shown (*.* is NOT needed)  
 
 General switches: /s[:n] /o:d|f /b /w:[n] /p /q /[-]x:~ /[-]y:DIR  
 /s[:n] = parse max 18 subdirectories deep: with /s:1-18 choice 1-18 levels  
 /o:d|f = sort order: directories or files first  
 /b = output filenames only - with /s DEVICE and PATH on each line too  
-/w:[n] = output default in 5 columns - with /w:2-5 choice 2-5 columns *  
+/w:[n] = output default in 5 columns - with /w:2-5 choice 2-5 columns 1*  
 /p = pause after each screen, Q can be used to quit (partly: Grub4dos for Uefi)  
 /q = quiet DIR: error messages & last file-count message only (not: /b or /w)  
-/[-]x:~ = only SFN-equivalent of LFN/real shortened LFN will [not] be shown **  
+/[-]x:~ = only SFN-equivalent of LFN/real shortened LFN will [not] be shown 2*  
 /[-]y:DIR = only PATH [not]containing DIR parsed - accepts '*'-wildcard 3*  
 1* Checks for graphicsmode 3/ 640x480 (80 chars on one screen-line needed)  
 2* Instead of '~' MAX 16 other characters can be used too (special feature)  
@@ -67,11 +64,14 @@ Special Switches: /nocase /dirsize:n /maxfiles:N /maxbyte:n /size:n
 /dirsize:N = max number of files parsed in each directory. Takes 'Nk' too  
 /maxfiles:N = max total number of files parsed - takes 'Nk' & 'Nm' too  
 /maxbyte:n = max total bytes parsed - takes 'nk' bytes and 'nm' bytes too  
-/size:n = only files with filesize 'n' bytes showed - takes 'nk/nm' bytes too *  
+/size:n = only files with filesize 'n' bytes showed - takes 'nk/nm' bytes too 1*  
 1* /a:-d is auto-set (not working with: /a:[-]d[-]a[-]r[-]s[-]h and /a:[-]d)  
 
-Remark: Grud4dos for UEFI soon 'out of malloc memory' (latest version 20240901)  
-
+Remarks:  
+File versions: Grubutil FAT and Grub4Dos 0.4.6a, Grub4dos for UEFI (watch FAT!)  
+Found not compatible with Grub4Dos 0.4.5b / Grub4Dos 0.4.5c / Grub4efi textmode  
+FAT needed, searched in %^~dp0, (bd), ROOT: /, /boot/grub/, /grub/ and /g4dll/  
+Grud4dos for UEFI soon 'out of malloc memory' (latest version 20240901)  
 More convenient => insmod DEVICE/PATH/FATLSDIR.G4B DIR (watch loading FAT!)  
 Based on copyFF.bat (:cpa & :copyfiles & :sub-dir => originator of call's seems to be Chenall)  
 
