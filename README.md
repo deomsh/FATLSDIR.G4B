@@ -13,7 +13,7 @@ DEVICE = (fd#), (hd#,#), (0x#) or (#); with ISO/UDF CD/DVD too
 /PATH/ accepts ONE wildcard: '*' at END of NAME[.EXT] in LAST directory  
 FILE = DIR specified file => on root without DEVICE and/or /PATH/ 3*  
 FILE accepts wildcard: '*' in END of Name & END of Extension (NOT: '?' )  
-1* Default verbose DIR: DIR & output messages too  
+1** Default verbose DIR: DIR & output messages too  
 2* FAT-DIR parsing needs 0x1000 total memory (2MB) - LS-DIR 0x200 (512KB)  
 2* Lowest value 0x3000 - forbidden: 0x3001-0xD460 and 0x12000-0x12FFF  
 3* FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)  
