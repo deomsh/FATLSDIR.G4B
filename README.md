@@ -103,3 +103,6 @@ First published version
 
 ### SCREENSHOTS
 
+Basic use on ROOT (if FATLSDIR.G4B is on ROOT too)
+
+![FATLSDIR G4B use on root, with -s, -b and -s -b too I](https://github.com/user-attachments/assets/94024f84-7404-49dc-a807-0de2aa7e773c)
