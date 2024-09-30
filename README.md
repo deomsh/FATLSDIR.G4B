@@ -11,9 +11,9 @@ Arguments space-separated! Switches: lower/uppercase free
 DEVICE = (fd#), (hd#,#), (0x#) or (#); with ISO/UDF CD/DVD too  
 /PATH/ = starting directory => without DEVICE => on root (PATH/ okay)  
 /PATH/ accepts ONE wildcard: '*' at END of NAME[.EXT] in LAST directory  
-FILE = DIR specified file => on root without DEVICE and/or /PATH/ **  
+_FILE = DIR specified file => on root without DEVICE and/or /PATH/ **  
 FILE accepts wildcard: '*' in END of Name & END of Extension (NOT: '?' )  
-'*  Default verbose DIR: DIR & output messages too  
+_*  Default verbose DIR: DIR & output messages too  
 ** FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)  
 ** Without FILE full directory will be shown (*.* is NOT needed)  
 3* FAT-DIR parsing needs 0x1000 total memory (2MB) - LS-DIR 0x200 (512KB)  
