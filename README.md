@@ -11,7 +11,7 @@ Arguments space-separated! Switches: lower/uppercase free
 DEVICE = (fd#), (hd#,#), (0x#) or (#); with ISO/UDF CD/DVD too  
 /PATH/ = starting directory => without DEVICE => on root (PATH/ okay)  
 /PATH/ accepts ONE wildcard: '*' at END of NAME[.EXT] in LAST directory  
-_FILE = DIR specified file => on root without DEVICE and/or /PATH/ **  
+FILE = DIR specified file => on root without DEVICE and/or /PATH/ **  
 FILE accepts wildcard: '*' in END of Name & END of Extension (NOT: '?' )  
 _*  Default verbose DIR: DIR & output messages too  
 ** FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)  
