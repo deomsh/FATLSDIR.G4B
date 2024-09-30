@@ -13,7 +13,7 @@ DEVICE = (fd#), (hd#,#), (0x#) or (#); with ISO/UDF CD/DVD too
 /PATH/ accepts ONE wildcard: '*' at END of NAME[.EXT] in LAST directory  
 FILE = DIR specified file => on root without DEVICE and/or /PATH/ **  
 FILE accepts wildcard: '*' in END of Name & END of Extension (NOT: '?' )  
-*  Default verbose DIR: DIR & output messages too  
+'*  Default verbose DIR: DIR & output messages too  
 ** FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)  
 ** Without FILE full directory will be shown (*.* is NOT needed)  
 3* FAT-DIR parsing needs 0x1000 total memory (2MB) - LS-DIR 0x200 (512KB)  
@@ -84,7 +84,7 @@ Example FATLSDIR.G4B (hd0,0)/WINDOWS/*.EXE
 Example FATLSDIR.G4B (hd0,0)/WINDOWS/MS*.DLL /s  
 Example FATLSDIR.G4B (hd0,0)/WINDOWS/SYS*/*.vxd  
 Example FATLSDIR.G4B (hd0,0)/WINDOWS/ /-y:SYSTEM /s  
-Example FATLSDIR.G4B (hd0,0)/PROGRA~1/ /s:2 /x:~  
+Example FATLSDIR.G4B (hd0,0)/PROGRA'~1/ /s:2 /x:~  
 Example FATLSDIR.G4B (hd2,4)/ /s /sfn:@  
 Example FATLSDIR.G4B (hd0,0) /a:hr /s /f  
 Example FATLSDIR.G4B (0xe0) /sfn /s  
