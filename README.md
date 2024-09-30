@@ -1,6 +1,6 @@
 ## FATLSDIR.G4B
 
-Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'  
+<pre><code>Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'  
 FATLSDIR.G4B [--mdbase=sector] [DEVICE][/PATH/][FILE] switches  
 FATLSDIR.G4B /? (this screen)  
 DIR files on DEVICE. If DEVICE and/or PATH omitted: on ROOT  
@@ -94,7 +94,7 @@ Example FATLSDIR.G4B (0xe0) /semicol
 Example FATLSDIR.G4B (hd0,0)/Program\ Files/ /dirsize:4 /a:-d /s /f /lfn  
 Example FATLSDIR.G4B "(hd0,0)/Program Files/" /maxfiles:2000 /s /lfn  
 Example FATLSDIR.G4B (hd0,0) /maxbyte:64m /s  
-Example FATLSDIR.G4B (hd0,0)/WINDOWS/ /size:0 /s /lfn  
+Example FATLSDIR.G4B (hd0,0)/WINDOWS/ /size:0 /s /lfn</code></pre>    
 
 ### History
 Version v0.1  
