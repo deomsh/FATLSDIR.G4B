@@ -2,7 +2,7 @@
 
 <pre><code>Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'  
 FATLSDIR.G4B [--mdbase=sector] [DEVICE][/PATH/][FILE] switches  
-FATLSDIR.G4B /? (this screen)  
+FATLSDIR.G4B /? (this text)  
 DIR files on DEVICE. If DEVICE and/or PATH omitted: on ROOT  
 DIR on hidden partitions too! *  
 On FAT partitions: default 8+3 File Names (or use /lfn[:]case, see there)  
