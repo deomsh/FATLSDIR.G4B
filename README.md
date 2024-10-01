@@ -117,6 +117,21 @@ More advanced use of switch /s with /s:n (max directory depth is 18 directories)
 
 ![FATLSDIR G4B use of wide (-w) and -s=1 and -s=2 and -lfn IV](https://github.com/user-attachments/assets/2d151c06-2153-4735-a6f5-f1d5e1d757f6)
 
-Use of switch /b
+Use of switch /b (after Quit pager)
+
+![FATLSDIR G4B use of list (-b) after Quit VI](https://github.com/user-attachments/assets/b0d87d5f-e5f8-4ab9-b593-04e03fdfae4c)
+
+Use of switch /b with /s, /lfn and sort /o:d (after Quit pager)
+
+![FATLSDIR G4B use of list (-b) and -s and -lfn afte Quit V](https://github.com/user-attachments/assets/88346d50-5e97-4b91-b55c-88367d852482)
+
+Search and parse directories with switch /y:DIR
+
+![FATLSDIR G4B search directories with switch -y=DIR with -w VII](https://github.com/user-attachments/assets/c32d6383-3c17-4297-bd84-13345a501ffa)
+
+Search and parse directory including sub-directories with switch /y:DIR conmbined with /s
+
+![FATLSDIR G4B search directories with switch -y=DIR with -s, -lfn and -b VIII](https://github.com/user-attachments/assets/db7b5e62-3ffa-47f9-9e6b-c919e0f85382)
+
 
 
