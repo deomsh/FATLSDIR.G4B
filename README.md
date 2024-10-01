@@ -1,4 +1,4 @@
-## FATLSDIR.G4B v0.1 (20240930)
+## FATLSDIR.G4B v0.1 (20241001)
 
 <pre><code>Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'  
 FATLSDIR.G4B [--mdbase=sector] [DEVICE][/PATH/][FILE] switches  
@@ -133,5 +133,5 @@ Search and parse directory including sub-directories with switch /y:DIR conmbine
 
 ![FATLSDIR G4B search directories with switch -y=DIR with -s, -lfn and -b VIII](https://github.com/user-attachments/assets/db7b5e62-3ffa-47f9-9e6b-c919e0f85382)
 
-
+Use of special switch /size:n
 
