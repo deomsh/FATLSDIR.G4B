@@ -98,7 +98,7 @@ Example FATLSDIR.G4B (hd0,0) /maxbyte:64m /s
 Example FATLSDIR.G4B (hd0,0)/WINDOWS/ /size:0 /s /lfn</code></pre>    
 
 ### HISTORY
-Version v0.1  
+Version 0.1  
 First published version
 
 ### SCREENSHOTS
