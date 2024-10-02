@@ -125,13 +125,9 @@ Use of switch /b with /s, /lfn and sort /o:d (after Quit pager)
 
 ![FATLSDIR G4B use of list (-b) and -s and -lfn afte Quit V](https://github.com/user-attachments/assets/88346d50-5e97-4b91-b55c-88367d852482)
 
-Search and parse directories with switch /y:DIR
+Search and parse directories with asterisk-wildcard in last directory in path together with switch /y:DIR*, also parse sub-directories with switch /s
 
-![FATLSDIR G4B search directories with switch -y=DIR with -w VII](https://github.com/user-attachments/assets/c32d6383-3c17-4297-bd84-13345a501ffa)
-
-Search and parse directory including sub-directories with switch /y:DIR conmbined with /s
-
-![FATLSDIR G4B search directories with switch -y=DIR with -s, -lfn and -b VIII](https://github.com/user-attachments/assets/db7b5e62-3ffa-47f9-9e6b-c919e0f85382)
+![FATLSDIR G4B search directories in last directory with asterisk and with switch -y=microsoftAsterisk, -lfn and -p, without and with -s X](https://github.com/user-attachments/assets/6bf07524-302d-49b3-ace9-16b50fd0d8aa)
 
 Use of special switch /size:n
 
