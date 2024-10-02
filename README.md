@@ -133,4 +133,7 @@ Use of special switch /size:n to found all zerobyte-files is a directory and all
 
 ![FATLSDIR G4B use of special switch -size=n, with -s and with and without -lfn XI](https://github.com/user-attachments/assets/9566ccc5-4691-41ce-8d1f-ab0c35115289)
 
+Auto-switching to ls directory parsing on non-fat file systems
+
+![FATLSDIR G4B auto ls directory parsing on non-fat file systems I](https://github.com/user-attachments/assets/0765d773-2fdb-44a8-8854-19998ab4e022)
 
