@@ -129,7 +129,7 @@ Search and parse directories with asterisk-wildcard in last directory in path to
 
 ![FATLSDIR G4B search directories in last directory with asterisk and with switch -y=microsoftAsterisk, -lfn and -p, without and with -s X](https://github.com/user-attachments/assets/6bf07524-302d-49b3-ace9-16b50fd0d8aa)
 
-Use of special switch /size:n to found all zerobyte-files is a directory and all sub-directories
+Use of special switch /size:n to found all zerobyte-files is a directory and all sub-directories. FAT directory parsing and ls directory parsing both
 
 ![FATLSDIR G4B use of special switch -size=n, with -s and with and without -lfn XI](https://github.com/user-attachments/assets/9566ccc5-4691-41ce-8d1f-ab0c35115289)
 
