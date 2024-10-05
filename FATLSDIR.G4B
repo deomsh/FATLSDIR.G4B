@@ -1,5 +1,5 @@
 !BAT
-#-#+ FATLSDIR.G4B v0.1 (20241002), by deomsh. Based on copyFF.bat (:cpa & :copyfiles & :sub-dir => originator of call's seems to be Chenall)
+#-#+ FATLSDIR.G4B v0.1 (20241005), by deomsh. Based on copyFF.bat (:cpa & :copyfiles & :sub-dir => originator of call's seems to be Chenall)
 debug status | set debugsts= ;; set debugsts=%debugsts:~-1,1% ;; debug 1 ;; debug msg=3
 errorcheck status | set errorsts= ;; set errorsts=%errorsts:~19%
 pager status | set pagersts= ;; set pagersts=%pagersts:~22%
@@ -1694,7 +1694,7 @@ if exist sd && raw cat --length=0 %source%/"%sd:~1%/%argtilde%" &; set tildelen=
 if not exist sd && raw cat --length=0 %source%/"%argtilde%" &; set tildelen=%@retval%
 set /a tildelen=%tildelen% &; if %tildelen%>=256 && set argtilde=
 if exist argtilde && cat --length=%tildelen% %source%%%sd%/%argtilde% | set argtilde=
-set numtilde= && set tilde= && set tildelen=
+if not /i "%arg:~0,2%"=="%argtilde:~0,2%" && set argtilde=
 endlocal && set argtilde=%argtilde%
 goto :eof
 ::
@@ -1936,7 +1936,7 @@ if "%~1"=="smallhelp" && echo Example FATLSDIR.G4B /w /s
 if "%~1"=="smallhelp" && echo Example FATLSDIR.G4B (hd0,0)/WINDOWS/MS*.DLL /s
 if "%~1"=="smallhelp" && echo Example FATLSDIR.G4B (hd0,0)/Program\ Files/ /dirsize:4 /a:-d /s /f /lfn && goto :eof
 clear && pager on
-echo FATLSDIR.G4B v0.1 (20241002), by deomsh
+echo FATLSDIR.G4B v0.1 (20241005), by deomsh
 echo Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'
 echo FATLSDIR.G4B [--mdbase=sector] [DEVICE][/PATH/][FILE] switches
 echo FATLSDIR.G4B /? (this screen)
