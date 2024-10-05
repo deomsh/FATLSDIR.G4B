@@ -1,4 +1,4 @@
-## FATLSDIR.G4B v0.1 (20241002)
+## FATLSDIR.G4B v0.1 (20241005)
 
 <pre><code>Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'  
 FATLSDIR.G4B [--mdbase=sector] [DEVICE][/PATH/][FILE] switches  
