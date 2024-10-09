@@ -105,35 +105,34 @@ First published version
 
 FAT and ls directory parsing on ROOT (switch /lfn needed on fat only)
 
-![FATLSDIR G4B use on root, with -s, and -s   -lfn on FAT12 I](https://github.com/user-attachments/assets/160f42c4-cb44-4c59-af7d-63b77bc3aff8)
+![FATLSDIR G4B use on root, with -s, and -s   -lfn on FAT12 I](https://github.com/user-attachments/assets/861ccca4-4a77-4137-9548-2b933c46bddc)
 
 Uses of switch /w (length of line 80 chars only - textmode or 640x480)
 
-![FATLSDIR G4B use of wide (-w) and -s II](https://github.com/user-attachments/assets/4e020ff3-162b-4218-8377-b7fe00a1bbaa)
+![FATLSDIR G4B use of wide (-w) and -s II](https://github.com/user-attachments/assets/04e46e51-ca9e-4a34-9b6d-577b5d460622)
 
-![FATLSDIR G4B use of wide (-w) and -s and -lfn III](https://github.com/user-attachments/assets/7fcb65d4-fb95-47ac-ae16-61cd253b0b34)
+![FATLSDIR G4B use of wide (-w) and -s and -lfn III](https://github.com/user-attachments/assets/0325ea03-7bd0-44f7-a8f1-3bfa3f01069c)
 
 More advanced use of switch /s with /s:n (max directory depth is 18 directories)
 
-![FATLSDIR G4B use of wide (-w) and -s=1 and -s=2 and -lfn IV](https://github.com/user-attachments/assets/2d151c06-2153-4735-a6f5-f1d5e1d757f6)
+![FATLSDIR G4B use of wide (-w) and -s=1 and -s=2 and -lfn IV](https://github.com/user-attachments/assets/f9db6b18-16af-4d27-bbed-344e0b1ed500)
 
 Use of switch /b (after Quit pager)
 
-![FATLSDIR G4B use of list (-b) after Quit VI](https://github.com/user-attachments/assets/b0d87d5f-e5f8-4ab9-b593-04e03fdfae4c)
+![FATLSDIR G4B use of list (-b) after Quit VI](https://github.com/user-attachments/assets/cc6f6eeb-894a-4934-8745-d2ec7cbb3c34)
 
 Use of switch /b with /s, /lfn and sort /o:d (after Quit pager)
 
-![FATLSDIR G4B use of list (-b) and -s and -lfn afte Quit V](https://github.com/user-attachments/assets/88346d50-5e97-4b91-b55c-88367d852482)
+![FATLSDIR G4B use of list (-b) and -s and -lfn afte Quit V](https://github.com/user-attachments/assets/002a1366-86be-4c26-9b7f-da9b97049222)
 
 Search and parse directories with asterisk-wildcard in last directory in path together with switch /y:DIR*, also parse their sub-directories with switch /s
 
-![FATLSDIR G4B search directories in last directory with asterisk and with switch -y=microsoftAsterisk, -lfn and -p, without and with -s X](https://github.com/user-attachments/assets/6bf07524-302d-49b3-ace9-16b50fd0d8aa)
+![FATLSDIR G4B search directories in last directory with asterisk and with switch -y=microsoftAsterisk, -lfn and -p, without and with -s X](https://github.com/user-attachments/assets/c15e6aeb-7e1f-427f-90b1-1ed6a25ecaf6)
 
 Use of special switch /size:n to found all zerobyte-files is a directory and all sub-directories. FAT directory parsing and ls directory parsing both
 
-![FATLSDIR G4B use of special switch -size=n, with -s and with and without -lfn XI](https://github.com/user-attachments/assets/9566ccc5-4691-41ce-8d1f-ab0c35115289)
+![FATLSDIR G4B use of special switch -size=n, with -s and with and without -lfn XI](https://github.com/user-attachments/assets/7982f47d-f8a5-404f-aeb3-f4ce10a631ff)
 
 Auto-switching to ls directory parsing on non-fat file systems
 
-![FATLSDIR G4B auto ls directory parsing on non-fat file systems I](https://github.com/user-attachments/assets/0765d773-2fdb-44a8-8854-19998ab4e022)
-
+![FATLSDIR G4B auto ls directory parsing on non-fat file systems I](https://github.com/user-attachments/assets/a65ae499-cab8-4c75-92f8-d83d2c633a2f)
