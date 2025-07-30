@@ -1,5 +1,7 @@
 !BAT
-#-#+ FATLSDIR.G4B v0.1 (20241009), by deomsh. Based on copyFF.bat (:cpa & :copyfiles & :sub-dir => originator of call's seems to be Chenall)
+#-#+ FATLSDIR.G4B v0.2 (20250730), by deomsh. Based on copyFF.bat (:cpa & :copyfiles & :sub-dir => originator of call's seems to be Chenall)
+if not exist @uefi &; setlocal && set /a version=*0x8278&0xFFFFFFFF > nul &; if %version%>=20170505 && endlocal ! echo Grub4dos version %version% too old, use version 20170505 or later && endlocal && goto :eof
+setlocal && set *
 debug status | set debugsts= ;; set debugsts=%debugsts:~-1,1% ;; debug 1 ;; debug msg=3
 errorcheck status | set errorsts= ;; set errorsts=%errorsts:~19%
 pager status | set pagersts= ;; set pagersts=%pagersts:~22%
@@ -22,10 +24,11 @@ set CMDLINE=grub> %0 %*
 if /i "%~1"=="" && call :rootchk &; if %result%==0 && goto :eov
 if exist sdev && if exist sdir && set nosdev=1 && goto :predir
 set "ARG1=%~1" ;; if not "%ARG1:~0,1%"=="(" && set nosdev=1 ;; if %nosdev%==1 && if not "%ARG1:~0,1%"=="/" && set nosdir=1 && set nosdev=
-set "sdev=%~d1"
-set "sdir=%~p1"
-set "name1=%~n1" &; if exist name1 && call Fn.11 "%name1%" "\x20" && echo -e "%name1%" | set name1= &; set "name1=%name1:~1,-1%"
-set "ext1=%~x1" &; if exist ext1 && call Fn.11 "%ext1%" "\x20" && echo -e "%ext1%" | set ext1= &; set "ext1=%ext1:~1,-1%"
+set "sdev=%~d1" && set bootsrc=%~dp0
+echo -e "%~p1" | set sdir= &; set "sdir=%sdir:~1,-1%" &; if "%sdir:~1,1%"=="." && echo PATH starting with '.' is not supported ! if "%sdir:~1,1%"=="(" && echo PATH starting with '(' is not supported &; set result=0 && echo && goto :eov
+echo -e "%~n1" | set name1= &; set "name1=%name1:~1,-1%" &; if "%name1:~0,1%"=="(" && echo FILE starting with '(' is not supported && set result=0 && echo && goto :eov
+echo -e "%~x1" | set ext1= &; if exist ext1 &; set "ext1=%ext1:~1,-1%" &; if "%ext1%"=="." && set set ext1=
+if exist ext1 && if not exist name1 && echo FILE starting with '.' is not supported && set result=0 && echo && goto :eov
 if not "%ARG1%"=="/" && if "%ARG1:~0,1%"=="/" && if not "%ARG1:~-1,1%"=="/" && call :optargs %* &; if %result%==0 && echo && call :help "smallhelp" && echo && goto :eov ! goto :predir
 set ARG1=
 set "roottest=%@root%"
@@ -51,7 +54,7 @@ if not exist wcn && if not exist wcx && set "file1=%name1%%%ext1%"
 if exist file1 && set file=1
 if exist size && set file=1
 if "%sdir:~-1,1%"=="/" && set "sdir=%sdir:~0,-1%"
-if not exist ls &; if exist spaces && set ls=/ls && set spaces= && if not exist SFN && set LFN=/LFN ! call Fn.11 "%sdir%/%name1%%%ext1%" "\x20" && set ls=/ls && if not exist SFN && set LFN=/LFN &; set "message=Spaces found in source, auto-switch to ls-mode"
+if not exist ls &; if exist spaces && set ls=/ls && set "message=Spaces found in source, auto-switch to ls-mode" && set spaces= && if not exist SFN && set LFN=/LFN ! call Fn.11 "%sdir%/%name1%%%ext1%" "\x20" && set ls=/ls && set "message=Spaces found in source, auto-switch to ls-mode" && if not exist SFN && set LFN=/LFN
 set "case=/i"
 setlocal && call :filesystem "%sdev%" &; set /u sourceok=%filesys% &; endlocal && set sourceok=%sourceok% && goto :skipsourceokold
 raw cat --locate=\x4E\x54\x46\x53\x20\x20\x20\x20 --length=8 --skip=3 %sdev%+1 > nul && set sourceok=NTFS && set /u "LF=/LF" && if not exist ls && set ls=/ls && echo NTFS source found, auto-switch to ls-mode
@@ -81,11 +84,10 @@ if exist ls && if not exist s && set f=
 if %q%==/q && set echomsg=
 set msds=0 && set lmsds=0
 if %sourceok%==NTFS && set sdsk=0 && set f=
-#NotAnymore#set msdf=0
 set fcs=0 && set lfcs=0
-#NotAnymore#set fcf=0 && set lfcf=0
-set copybyt=0 && set lcopybyt=0
-delmod -l fat > nul || insmod (bd)/fat > nul || insmod (bd)/boot/grub/fat > nul || insmod (bd)/grubutil/fat > nul || insmod (bd)/grub/fat > nul || insmod (bd)/g4dll/fat > nul || insmod /fat > nul || insmod /grubutil/fat > nul || insmod /grub/fat > nul || insmod /g4dll/fat > nul || insmod /boot/grub/fat > nul || echo && echo Grubutil FAT not found => FATLSDIR.G4B /? && echo && set result=0 && goto :eov
+set copybyt=0 && set lcopybyt=0 && set INSMOD=%INSMOD%
+delmod -l fat > nul && set INSMOD=fat
+delmod -l fat > nul || insmod %bootsrc%fat > nul || insmod (bd)/fat > nul || insmod (bd)/boot/grub/fat > nul || insmod (bd)/grubutil/fat > nul || insmod (bd)/grub/fat > nul || insmod (bd)/g4dll/fat > nul || insmod /fat > nul || insmod /grubutil/fat > nul || insmod /grub/fat > nul || insmod /g4dll/fat > nul || insmod /boot/grub/fat > nul || echo && echo Grubutil FAT not found => FATLSDIR.G4B /? && echo && set result=0 && goto :eov
 if "%sourceok:~0,3%"=="FAT" && if not exist ls && set /u sdir=%sdir%
 if "%sourceok:~0,3%"=="ISO" && if not exist semicol && set "semicol=Y"
 if "%sourceok%"=="UDF" && if not exist semicol && set "semicol=Y"
@@ -121,16 +123,16 @@ cat --locate=\x2F --replace=\x20 (md)%basemem%+1 > nul
 cat --locate=\x22 --replace=\x20 (md)%basemem%+1 > nul
 setlocal && set result= && cat (md)%basemem%+1 | call :parsesd
 echo -n > (md)%basemem%+1
-endlocal && set "sdir=%sd%" && set "z=%z%" && set /u sdsfn=%sdsfn% && set dir=%dir% && set "sdlfn=%sdlfn%" && set hash=%hash% && set result=%result% &; if %result%==0 && goto :eov
+endlocal && set "sdir=%sd%" && set "z=%z%" && set /u "sdsfn=%sdsfn%" && set dir=%dir% && set "sdlfn=%sdlfn%" && set hash=%hash% && set result=%result% &; if %result%==0 && goto :eov
 call Fn.11 "%sdir%/%z%" "*" && echo && echo Wildcard '*' allowed as last char of last directory only => FATLSDIR.G4B /? && echo && set result=0 && goto :eov
 if not exist SFN && set sdsfn= &; if "%sdlfn%"==" /" && set sdlfn= && set hash=
 set %casearg% "sdir=%sdir%"
 echo -n > (md)%basemem%+1 && echo -e "%sdir%" > (md)%basemem%+1 && cat --locate=\x3F --replace=\x3D (md)%basemem%+1 > nul && cat (md)%basemem%+1 | set sdir= &; set "sdir=%sdir:~1,-1%" && echo -n > (md)%basemem%+1
 if not exist SFN && set sdsfn=
-if not exist z && ls %sdev%/"%sdir:~1%"/ > nul || echo && echo Directory$[0x00]"$[]%sdev%%%sdir%$[0x00]"$[]does not exist or is empty && echo && set result=0 && goto :eov
-if exist z && ls %sdev%/"%sdir:~1%/%z%" > nul || echo && echo Directories$[0x00]"$[]%sdev%%%sdir%/%z%%*$[0x00]"$[]do not exist or are empty && echo && set result=0 && goto :eov
+if not exist z && if exist sdir && ls %sdev%/"%sdir:~1%"/ > nul || echo && echo Directory$[0x00]"$[]%sdev%%%sdir%$[0x00]"$[]does not exist or is empty && echo && set result=0 && goto :eov
+if exist z && if exist sdir && ls %sdev%/"%sdir:~1%/%z%" > nul || echo && echo Directories$[0x00]"$[]%sdev%%%sdir%/%z%%*$[0x00]"$[]do not exist or are empty && echo && set result=0 && goto :eov
 :setsource
-if not exist sdir &; ls %sdev%/ > nul || echo && echo Directory %sdev% does not exist or is empty && echo && set result=0 && goto :eov
+if not exist sdir &; ls %sdev%/ > nul || echo && echo Root directory of %sdev% is empty && echo && set result=0 && goto :eov
 set "source=%sdev%%%sdir%"
 if exist sdsfn && set "srcsfn=%sdev%%%sdsfn%" && set sdsfn=
 set sdev=
@@ -139,26 +141,20 @@ read VAR.23 ;; if %@retval%==3 && set linelen=80 && if exist ls && set /A pagele
 if exist ls && if not exist pagelen && if not exist q && setlocal && call :pagestat &; endlocal && set linelen=%LINELEN% && set /A pagelen=%PAGELEN%-1 > nul
 if exist w && if not exist ls && if not exist linelen && if not exist q && setlocal && call :pagestat &; endlocal && set linelen=%LINELEN% && set /A pagelen=%PAGELEN%-1 > nul
 if exist ls && if not exist q && setlocal && call :Fn.4 &; if not %h%==0 && call :Fn.5 0 %v% ! set h=0 &; endlocal
-#DEBUG#if not %linelen%==80 && echo GO && setlocal && echo GO2 && call :Fn.4 &; pause h=%h% v=%v% &; if not %h%==0 && call :Fn.5 0 %v% ! set h=0 &; endlocal
 if exist pagelen && if not exist q && echo %CMDLINE% && set CMDLINE=
-#DEBUG#if exist pagelen && if not exist q && echo %CMDLINE% spaces=%spaces% && set CMDLINE= && pause
 if exist q && set w= && set b=
 if exist w &; if not %linelen%==80 && echo && echo To use /w graphicsmode must be set to 3 or to -1 640 => FATLSDIR /? && echo && set result=0 && goto :eov ! if not exist ls && set linelen= && set pagelen=
 if exist ls && set /A lineend=%linelen%-1 > nul && set linelen= ! set linelen=
-#DEBUG#if exist ls && setlocal && call :Fn.4 &; if set /a linenum=%v% > nul &; echo -n h=%h% v=%v% l=%lineend% p=%pagelen% && pause && call :Fn.5 %h% %v% && endlocal && set pagestat=%lineend%%%pagelen%%%linenum%
 if exist ls && setlocal && call :Fn.4 &; set /a linenum=%v%+1 > nul &; endlocal && set pagestat=%lineend%%%pagelen%%%linenum%
 if exist ls && if not exist q && setlocal && call :Fn.4 &; if not %h%==0 && call :Fn.5 0 %v% ! set h=0 &; endlocal
 if %p%==/p && if not exist ls && set pagestat= && pager on
-#ORG#if %p%==/p && if not exist ls && set p= && set pagestat= && pager on
-#DEBUG#if exist ls && if %p%==/p && if not exist q && setlocal && call :Fn.4 &; echo -n pagestat=%pagestat% h=%h% v=%v% && pause && call :Fn.5 %h% %v% && endlocal
 if exist ls && if %p%==/p && if not exist q && if %pagestat:~8%>=%pagestat:~4,4% &; if exist s && if exist w && set pagestat=%pagestat:~0,8%%0 ! if exist s && set pagestat=%pagestat:~0,8%%2 ! set pagestat=%pagestat:~0,8%%1
 ## Parse and verify /a:[-]darsh switch
 if exist a && call :parseatt
 if exist parsedir && set o=
 if exist ls && if exist parsedir && set a=
 ## 255 sectors gives problems with FD!
-set callsect=256
-#old#if exist c && if %c%>=1 && set /A callsect=%c% > nul ! set callsect=256
+set callsect=256 && set bootsrc=
 setlocal && call :cleanmem %basemem% %callsect% &; endlocal
 set /A mdmem=%basemem% + %callsect% > nul
 setlocal && call :cleanmem %mdmem% %callsect% &; endlocal
@@ -168,7 +164,10 @@ if exist ls && if exist message && echo %message% && setlocal && set /a linenum=
 if exist ls && if exist message && if not exist size && if not exist y &; if exist file if not exist file1 if not %message:~0,6%==Spaces |; echo && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 if not exist ls && if exist message && echo %message% && echo
 setlocal && set "echofile=%source%" && call :nolspace &; endlocal && set "echosrc=%echofile%"
-if not exist q && if not exist s &; if not %nosdev%==1 if not %nosdir%==1 |; if exist srcsfn && echo -e %srcsfn%/ ! echo -e %source%/
+if %ls%==/ls && setlocal && call :Fn.4 &; endlocal && set line=%v% &; if %line%>=1 && set /a line=%line%-1 > nul ! echo && set line=0
+## h=79 for graphicsmode 3 or 640x480 only!
+if %ls%==/ls && if not exist s && if not exist q &; if not %nosdev%==1 && if not %nosdir%==1 ;& setlocal && set subdir=1 && call :Fn.5 "%pagestat:~0,4%" "%line%" &; if exist sdlfn && call :pager "[%echosrc%/ %srcsfn%/]" ! if exist srcsfn && call :pager "[%srcsfn%/]" ! call :pager "[%echosrc%/]" &; if exist sdlfn && echo -e $[0x00]"$[]%echosrc%/  $[0x08]%srcsfn%/$[0x00]" ! if exist srcsfn && echo -e $[0x00]"$[]%srcsfn%/$[0x00]" ! echo -e $[0x00]"$[]%echosrc%/$[0x00]" &; set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
+if not %ls%==/ls && if not exist q && if not exist s &; if not %nosdev%==1 && if not %nosdir%==1 &; if exist srcsfn && echo -e %srcsfn%/
 if exist file && goto :nodirmsg
 if exist z && goto :nodirmsg
 if exist a && goto :nodirmsg
@@ -177,9 +176,7 @@ if exist q && goto :nodirmsg
 if exist y &; if not %y:~1,1%==- && goto :nodirmsg
 if exist sdlfn &; call Fn.11 "%sdir%" "~" || set sdlfn=
 if exist ls && if not %b%==/b && if exist s && call :pager "0" "1" &; if not exist message && echo
-if %ls%==/ls && setlocal && call :Fn.4 &; endlocal && set line=%v% &; if %line%>=1 && set /a line=%line%-1 > nul ! echo && set line=0
-## h=79 for graphicsmode 3 or 640x480 only!
-if %ls%==/ls && if not exist q && if not %b%==/b && if exist srcsfn && setlocal && set subdir=1 && call :pager "[%srcsfn%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" && echo -e $[0x00]"$[0x07]%srcsfn%$[0x00]" && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
+if %ls%==/ls && if exist s && if not exist q && if not %b%==/b && if exist srcsfn && setlocal && set subdir=1 && call :pager "[%srcsfn%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" && echo -e $[0x00]"$[]%srcsfn%$[0x00]" && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 if %ls%==/ls && if exist s && if not exist q && if not %b%==/b && if not exist srcsfn && setlocal && set subdir=1 && call :Fn.5 "%pagestat:~0,4%" "%line%" &; if exist sdlfn && call :pager "[%echosrc% %srcsfn%]" ! call :pager "[%echosrc%]" &; if exist sdlfn && echo -e $[0x00]"$[0x07]%echosrc%  $[0x08]%sdlfn%$[0x00]" ! call :Fn.5 "%pagestat:~0,4%" "%line%" && echo $[0x00]"$[0x07]%echosrc%/$[0x00]" &; set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 if not exist ls && if exist s && if not exist b && echo
 if not %ls%==/ls && if exist sdlfn &; if not %b%==/b && if not %w:~0,2%==/w && echo -e %source%  $[0x08]%sdlfn% ! set sdlfn=
@@ -188,7 +185,7 @@ if not %ls%==/ls && if exist s && if not exist q && if not %b%==/b && if not exi
 :nodirmsg
 if exist ls && if exist file && if exist w && if exist s && echo && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 if not exist ls && if exist file && if exist w && if exist s && echo
-if not exist srcsfn && if exist echosrc && set srcsfn=%echosrc% && set echosrc=
+if not exist srcsfn && if exist echosrc && set "srcsfn=%echosrc%" && set echosrc=
 if exist LFN && if not exist sdlfn && if exist s && set "sdlfn=%sdir%"
 set sdir= && set nosdev= && set nosdir= && set message=
 ## ls-based directory-parsing
@@ -198,16 +195,9 @@ if %ls%==/ls && if exist y && if not "%y:~1,1%"=="-" && if not exist z && set sd
 if %ls%==/ls && if exist z && set sd= && call :lssubs &; goto :exit
 if %ls%==/ls && goto :exit
 ## fd-based directory-parsing
-#old#if %n%>=1 && set /A parsesec=%n% + 1 > nul ! set /A parsesec=4079 > nul
 ## Seems to be max. in Vbox: 14 x 256 sectors above 0x3000+256. Try for 15 x...
-#old#if %n%>=3585 echo && echo /n:%n% is too high && set result=0 && goto :eov
-#old#if %n%>=3585 echo && echo /n:%n% is too high && set result=0 && goto :eov
-#old#if %n%>=1 && set /A parsesec=%n% + 1 > nul ! set /A parsesec=3839 > nul
-#check#parsesec=4079 ?
-## SetTo# 15 x 256 =3840 [-1]
-#BadFor/b#
+## parsesec:SetTo# 15 x 256 =3840 [-1]
 if not exist ls && if exist b && if exist p && echo && echo
-#OkeFor/b#pasue KEY...
 set /A parsesec=3839 > nul
 set /A ddifsect=%parsesec%+1 > nul
 set cd= && set line=
@@ -324,14 +314,14 @@ goto :spaceloop
 ::
 :parsesd
 ## Check wildcards and SFN for last directory in PATH
-if "%1"=="" &; if not %tilde%==Y && set sdlfn= ! set hash=Y
-if "%1"=="" && goto :eof
+if "%~1"=="" &; if not %tilde%==Y && set sdlfn= ! set hash=Y
+if "%~1"=="" && goto :eof
 set arg= && set argname= && set argext= && set argtilde=
 set "argname=%~n1"
 set "argext=%~x1"
 set "arg=%argname%%%argext%"
-if "%arg:~-1,1%"=="*" && if not "%2"=="" && echo && echo Wildcard '*' allowed in last directory only => FATLSDIR.G4B /? && echo && set result=0 && goto :eof
-if "%arg:~-1,1%"=="*" && if "%2"=="" && set "arg=%arg:~-1%" && set "z=%arg:~0,-1%" && set dir=1
+if "%arg:~-1,1%"=="*" && if not "%~2"=="" && echo && echo Wildcard '*' allowed in last directory only => FATLSDIR.G4B /? && echo && set result=0 && goto :eof
+if "%arg:~-1,1%"=="*" && if "%~2"=="" && set "arg=%arg:~-1%" && set "z=%arg:~0,-1%" && set dir=1
 if exist z && if "%sd:~-1,1%"=="/" && set "sd=%sd:~-1%"
 if exist z && goto :eof
 if exist SFN && goto :nosdtilde
@@ -350,6 +340,7 @@ if exist SFN && if %lfncatch%==1 && call :lfn2sfn
 set "sd=%sd%/%arg%"
 if not exist argtilde && set "sdlfn=%sdlfn%/%arg%"
 if exist argtilde && if exist sdlfn && set "sdlfn=%sdlfn%/%argtilde%" && set argtilde=
+if not exist sfnfile && set "sdsfn=%sdsfn%/%arg%"
 if exist sfnfile && set "sdsfn=%sdsfn%/%sfnfile%" && set sfnfile=
 shift
 goto :parsesd
@@ -393,7 +384,7 @@ if %parsedir%==1 && goto :fdshow
 ## Clean memdrive
 setlocal && call :cleanmem %mdmem% %ddifsect% &; endlocal
 ## Parse directory: next files only
-if exist o && if %o:~0,4%==/o:d && set subdir=0 && set showdir=0 && set files=1 && set echodir=%echodir%
+if exist o && if %o:~0,4%==/o:d && set subdir=0 && set showdir=0 && set files=1 && set "echodir=%echodir%"
 if exist o && fat dir /a-d%a% %source%%%cd% > (md)%mdmem%+%parsesec%
 if not exist o && fat dir /a%a% %source%%%cd% > (md)%mdmem%+%parsesec%
 cat --locate=\x5D --number=1 (md)%mdmem%+1 > nul
@@ -404,7 +395,7 @@ set findsect=0 && set skipbyt0=0
 :skiploop
 ## Better before to spare variables in :fdcopy except skipbyt0
 set skipbyt1= && set minbyt1= && set minbyt2= && set minbyt3= && set minbyt4= && set minbyt5= && set maxbyt1= && set argbyt1= && set maxsec=
-if not exist s && set echodir=%echodir%
+if not exist s && set "echodir=%echodir%"
 ## Send output to fdcopy
 cat --skip=%skipbyt0% (md)%mdmem%+%parsesec% | call :fdcopy
 if exist maxfiles && if %fcs%>=%maxfiles% && goto :fdshow
@@ -498,9 +489,9 @@ if %lastkey%==Q && goto :eof ! if exist lastkey && set ls=%lastkey%
 if not exist @uefi && setlocal && set * && set ls=%ls% && call :lastkey "Esc" &; if not %lastkey%==0x51 && if not %lastkey%==0x71 && endlocal && set lastkey=%ls% ! endlocal && set lastkey=Q && goto :eof
 if exist maxfiles && if %fcs%>=%maxfiles% && goto :eof
 if exist maxbyte && if %copybyt%>=%maxbyte% && goto :eof
-if "%1"=="" && set echodir=%echodir% && goto :eof
-if "%2"=="" && set echodir=%echodir% && goto :eof
-if "%3"=="" && set echodir=%echodir% && goto :eof
+if "%1"=="" && set "echodir=%echodir%" && goto :eof
+if "%2"=="" && set "echodir=%echodir%" && goto :eof
+if "%3"=="" && set "echodir=%echodir%" && goto :eof
 ## Parse %-arguments
 set arg= && set larg= && set argname= && set largname= && set argext= && set largext= && set sfndir= && set nulsize= && set argafter= && set argsize= && set cmdlen= && set KB= && set filesize= && set date= && set time= && set gotomsg= && set skip= && set emptydir= && set tilde= && set argtilde=
 set "arg=%1" &; set larg=%@retval% &; set /a larg=%larg% > nul
@@ -546,7 +537,7 @@ if %subdir%==1 && if exist sfndir && goto :skip
 if %subdir%==1 && if not exist sfndir && goto :skipcopy
 ## Suddenly very slow with big dir's. New: 'if exist sfndir' much faster!
 ## Early ending at end of "callsect"
-if not exist sfndir && if "%2"=="" && if "%3"=="" && set echodir=%echodir% && goto :eof
+if not exist sfndir && if "%2"=="" && if "%3"=="" && set "echodir=%echodir%" && goto :eof
 ## Get file-size & test for FAT dir zero-byte files
 set /a argsize=%2 > nul
 set "KB=%3"
@@ -586,13 +577,15 @@ if %LFN%==/LFN:@ && set tilde= &; call Fn.11 "%sdlfn%" "~" && set tilde=Y
 ## Start-echo for /s with a/ file if dirs & files = 0
 if exist echodir && if exist s && if not exist b && if not exist w && if %msds%==0 && if %fcs%==0 &; if not exist a if not exist file |; echo
 ## Deleted 'Directory: ' to make more space for LFN with /lfn
-if exist echodir && if not exist a && if exist file && if not %b%==/b && if not exist w && if %hash%==Y && echo -e %source%%%cd%/  $[0x08]%sdlfn%/ && set echodir=
-if exist echodir && if exist a && if not %b%==/b && if not exist w && if %hash%==Y && echo -e %source%%%cd%/  $[0x08]%sdlfn%/ && set echodir=
+if exist echodir && if exist sdlfn && if not exist a && if exist file && if not %b%==/b && if not exist w && if %hash%==Y && echo -e %source%%%cd%/ $[0x00]"$[0x08]%sdlfn%/$[0x00]" && set echodir=
+if exist echodir && if not exist sdlfn && if not exist a && if exist file && if not %b%==/b && if not exist w && if %hash%==Y && echo -e %source%%%cd%/ && set echodir=
+if exist echodir && if exist sdlfn && if exist a && if not %b%==/b && if not exist w && if %hash%==Y && echo -e %source%%%cd%/ $[0x00]"$[0x08]%sdlfn%/$[0x00]" && set echodir=
+if exist echodir && if not exist sdlfn && if exist a && if not %b%==/b && if not exist w && if %hash%==Y && echo -e %source%%%cd%/ && set echodir=
 if exist echodir && if not exist a && if not %b%==/b && if exist file && if not %hash%==Y && echo -e %source%%%cd%/ && set echodir=
 if exist echodir && if exist a && if not %b%==/b && if not %hash%==Y && echo -e %source%%%cd%/ && set echodir=
 endlocal && set "echodir=%echodir%"
 if exist sfndir && if %showdir%==1 && if exist argtilde && call :makespace "<%sfndir%>" "24" "after" &; if exist result && set "sfndir=%result%" && set result=
-if exist sfndir && if not exist file && if not %b%==/b && if not %w:~0,2%==/w && if %showdir%==1 && if exist argtilde && echo -e %date%  %time%  %sfndir% $[0x08]/%argtilde%/ && set /a msds=%msds% + 1 > nul && set /a lmsds=%lmsds% + 1 > nul && goto :skip
+if exist sfndir && if not exist file && if not %b%==/b && if not %w:~0,2%==/w && if %showdir%==1 && if exist argtilde && echo -e %date%  %time%  %sfndir%$[0x00]"$[0x08]/%argtilde%/$[0x00]" && set /a msds=%msds% + 1 > nul && set /a lmsds=%lmsds% + 1 > nul && goto :skip
 if exist sfndir && if not exist file && if not %b%==/b && if not %w:~0,2%==/w && if %showdir%==1 && if not exist argtilde && echo -e %date%  %time%  <%sfndir%> && set /a msds=%msds% + 1 > nul && set /a lmsds=%lmsds% + 1 > nul && goto :skip
 if exist sfndir && if %showdir%==1 && if %b%==/b && if not exist s && if not exist dir && echo <%sfndir%> && set /a msds=%msds% + 1 > nul && set /a lmsds=%lmsds% + 1 > nul && goto :skip
 if exist sfndir && if %showdir%==1 && if %b%==/b && if not exist s && if exist dir && echo %source%%%cd%/%sfndir%/ && set /a msds=%msds% + 1 > nul && set /a lmsds=%lmsds% + 1 > nul && goto :skip
@@ -612,10 +605,12 @@ setlocal
 if not exist w && if not exist b && if %argsize%>=1000 && call :thousandseparator "%argsize%" "," &; if exist result && set argsize=%result% && set result=
 if not exist filesize && if not exist sfndir && if not %w:~0,2%==/w && if not %b%==/b && if %files%==1 && if exist argsize && call :makespace "%argsize%" "10" &; if exist result && set argsize=%result% && set result=
 if exist filesize && if not exist sfndir && if not %w:~0,2%==/w && if not %b%==/b && if %files%==1 && if exist argsize && call :makespace "%argsize%" "13" &; if exist result && set argsize=%result% && set result=
-if not exist filesize && if not exist sfndir && if not %w:~0,2%==/w && if not %b%==/b && if %files%==1 && echo -e %date%  %time%  %arg%  %argsize% %KB% $[0x08]%argtilde%
-if exist filesize && if not exist sfndir && if not %w:~0,2%==/w && if not %b%==/b && if %files%==1 && echo -e %date%  %time%  %arg%  %argsize% $[0x08]%argtilde%
+if not exist filesize && if not exist sfndir && if exist argtilde && if not %w:~0,2%==/w && if not %b%==/b && if %files%==1 && echo -e %date%  %time%  %arg%  %argsize% %KB%$[0x00]"$[0x08]%argtilde%$[0x00]"
+if not exist filesize && if not exist sfndir && if not exist argtilde && if not %w:~0,2%==/w && if not %b%==/b && if %files%==1 && echo -e %date%  %time%  %arg%  %argsize% %KB%
+if exist filesize && if not exist sfndir && if exist argtilde && if not %w:~0,2%==/w && if not %b%==/b && if %files%==1 && echo -e %date%  %time%  %arg%  %argsize%$[0x00]"$[0x08]%argtilde%$[0x00]"
+if exist filesize && if not exist sfndir && if not exist argtilde && if not %w:~0,2%==/w && if not %b%==/b && if %files%==1 && echo -e %date%  %time%  %arg%  %argsize%
 if exist file && if exist sfndir && if exist argtilde && if not %w:~0,2%==/w && if not %b%==/b && if %showdir%==1 && call :makespace "%<%sfndir%>%" "14" &; if exist result && set arg=%result% && set result=
-if exist file && if exist sfndir && if exist argtilde && if not %w:~0,2%==/w && if not %b%==/b && if %showdir%==1 && echo -e %date%  %time%  %sfndir% $[0x08]/%argtilde%/ && set /a msds=%msds% + 1 > nul && set /a lmsds=%lmsds% + 1 > nul && endlocal && goto :skip
+if exist file && if exist sfndir && if exist argtilde && if not %w:~0,2%==/w && if not %b%==/b && if %showdir%==1 && echo -e %date%  %time%  %sfndir%$[0x00]"$[0x08]/%argtilde%/$[0x00]" && set /a msds=%msds% + 1 > nul && set /a lmsds=%lmsds% + 1 > nul && endlocal && goto :skip
 endlocal
 if exist file && if exist sfndir && if not exist argtilde && if not %w:~0,2%==/w && if not %b%==/b && if %showdir%==1 && echo -e %date%  %time%  %arg% && set /a msds=%msds% + 1 > nul && set /a lmsds=%lmsds% + 1 > nul && goto :skip
 if not exist sfndir && if not %w:~0,2%==/w && if %b%==/b && if not exist s && if not exist dir && if %files%==1 && echo %arg%
@@ -660,31 +655,27 @@ set cmdlen=
 if exist z && if not exist s && set gotomsg= && call :testzdir "goto :fdendloc"
 if exist z && if exist s && set gotomsg= && call :testzdir "goto :fdendloc" "set arg=%cd%/%sfndir%"
 if exist z && if exist gotomsg &; %gotomsg%
-#DEBUG#call Fn.11 "%sfndir%" "TEST" && echo A :fdsubdir z=%z% y=%y%
 if exist y && if not "%y:~1,1%"=="-" && setlocal && set dir= && set /u "argname=%~n1" && set /u "argext=%~x1" && set gotomsg= && call :testydir "goto :fskipmld" "set cd=%cd%/%sfndir%" &; endlocal && set "gotomsg=%gotomsg%" &; if exist gotomsg && set z= && %gotomsg%
-#DEBUG#call Fn.11 "%sfndir%" "TEST" && echo B :fdsubdir z=%z% y=%y%
 if not exist y if not exist z |; set Z=%z% && if exist y && if not "%y:~1,1%"=="-" && set /u Y=%y:~3% &; if %Y:~-1,1%==* && set Y=%Y:~0,-1% ! set Y=/%Y%/
 set z=
 if not exist z && if exist y && if not "%y:~1,1%"=="-" && set gotomsg= && set y=
 if exist z && if exist y && if not "%y:~1,1%"=="-" && set y=
 ## Output-message
-#DEBUG#call Fn.11 "%arg%" "TEMP" && echo C :fdsubdir z=%z% y=%y% Z=%Z% Y=%Y%
 if not exist f &; fat dir %source%%%cd%/%sfndir% > nul || goto :fdendloc
 if exist Y &; call Fn.11 %source%%%cd%/%sfndir%/ %Y% || goto :fskipmld
 ## Reset local counters in :fdcpa
 setlocal
-#DEBUG#call Fn.11 "%arg%" "TESTLF" && echo D :fdsubdir z=%z% y=%y% Z=%Z% Y=%Y%
-if exist LFN && if not exist b && if not exist a && if not exist w &; if exist argtilde && set hash=Y && set "echodir=%source%%%cd%/%sfndir%/  $[0x08]%sdlfn%/%argtilde%/" && set "sdlfn=%sdlfn%/%argtilde%" ! set "echodir=%source%%%cd%/%sfndir%/" && set "sdlfn=%sdlfn%/%sfndir%" && call Fn.11 "%source%%%cd%" "~" && if %hash%==Y && set "echodir=%source%%%cd%/%sfndir%/  $[0x08]%sdlfn%/%sfndir%/"
+if exist LFN && if not exist b && if not exist a && if not exist w &; if exist argtilde && set hash=Y && set "echodir=%source%%%cd%/%sfndir%/" && set "sdlfn=%sdlfn%/%argtilde%" ! set "echodir=%source%%%cd%/%sfndir%/" && set "sdlfn=%sdlfn%/%sfndir%" && call Fn.11 "%source%%%cd%" "~" && if %hash%==Y && set "echodir=%source%%%cd%/%sfndir%/"
 if not exist LFN && if not exist b && if not exist a && if not exist w && set "echodir=%source%%%cd%/%sfndir%/"
 ## Deleted 'Directory: ' to make more space for LFN with /lfn
-if not exist q && if exist echodir && if not exist b && if not exist file &; if %msds%==0 && if %fcs%==0 && if exist Y && echo ! if %msds%==0 && if %fcs%==0 && if exist Z && echo ! set Y= && set Z= &; echo -e %echodir% && endlocal && set "sdlfn=%sdlfn%" && set hash=%hash% && goto :fskipmld
-if not exist q && if exist b && if not exist o && if not exist file && echo %source%%%cd%/%sfndir%/
+if not exist q && if exist echodir && if not exist b && if not exist file && if exist argtilde &; if %msds%==0 && if %fcs%==0 && if exist Y && echo ! if %msds%==0 && if %fcs%==0 && if exist Z && echo ! set Y= && set Z= &; echo -e %echodir% $[0x00]"$[0x08]%sdlfn%/$[0x00]" && endlocal && set "sdlfn=%sdlfn%" && set hash=%hash% && goto :fskipmld
+if not exist q && if exist echodir && if not exist b && if not exist file && if not exist argtilde &; if %msds%==0 && if %fcs%==0 && if exist Y && echo ! if %msds%==0 && if %fcs%==0 && if exist Z && echo ! set Y= && set Z= &; echo -e %echodir% && endlocal && set "sdlfn=%sdlfn%" && set hash=%hash% && goto :fskipmld
+if not exist q && if exist b && if not exist o && if not exist file &; if not exist argtilde && echo %source%%%cd%/%sfndir%/ ! echo %source%%%cd%/%sfndir%/ $[0x00]"$[0x08]%sdlfn%/%argtilde%/$[0x00]"
 if not exist q && if not exist file && if not exist a && if not exist b &; if %msds%==0 && if %fcs%==0 && if exist Y && echo ! if %msds%==0 && if %fcs%==0 && if exist Z && echo ! set Y= && set Z= &; echo -e %source%%%cd%/%sfndir%/
 endlocal && set "sdlfn=%sdlfn%" && set hash=%hash%
 :fskipmld
 set Y= && set Z=
 set "cd=%cd%/%sfndir%"
-#DEBUG#call Fn.11 "%sfndir%" "TEST" && echo D :fdsubdir z=%z% y=%y% cd=%cd%
 call :fdcpa
 :fdendloc
 set Y= && set Z=
@@ -712,7 +703,6 @@ goto :lsfiles
 if exist SFN && setlocal && set /A mdmem=%basemem%+11 > nul &; echo -n > (md)%mdmem%+28
 if exist SFN && endlocal
 set equation=
-#OLTILDE#set equation= && set tilde=
 setlocal && call :cleanmem %mdmem% %callsect% &; endlocal
 ## Needed!
 errorcheck off
@@ -724,20 +714,17 @@ if not exist sd && ls %source%/ > (md)%mdmem%+%callsect%
 cat --locate=\x00 --number=1 (md)%mdmem%+%callsect% > nul &; set /A pagelen=%?% > nul
 if not exist pagelen && set /A pagelen=%callsect% * 0x200 > nul &; set maxlen=%pagelen%
 cat --locate=\x3D --replace=\x3F --length=%pagelen% (md)%mdmem%+%callsect% > nul && set equation=Y
-#OLTILDE#cat --locate=\x7E --length=%pagelen% (md)%mdmem%+%callsect% > nul && set tilde=Y
 cat --locate=% --replace=: --length=%pagelen% (md)%mdmem%+%callsect% > nul
 if exist w && cat --locate=\x20&& --replace=\x20:: --length=%pagelen% (md)%mdmem%+%callsect% > nul
 if exist w && cat --locate=\x20&; --replace=\x20:: --length=%pagelen% (md)%mdmem%+%callsect% > nul
 if exist w && cat --locate=\x20;; --replace=\x20:: --length=%pagelen% (md)%mdmem%+%callsect% > nul
 if exist w && cat --locate=\x20! --replace=\x20: --length=%pagelen% (md)%mdmem%+%callsect% > nul
-#DEBUG#set /A pagelen=%callsect% * 0x200 > nul
 cat --length=%pagelen% (md)%mdmem%+%callsect% | call :lscopy
 goto :lsshow
 :lsfiles
 if exist SFN && setlocal && set /A mdmem=%basemem%+11 > nul &; echo -n > (md)%mdmem%+28
 if exist SFN && endlocal
 set equation=
-#OLTILDE#set equation= && set tilde=
 setlocal && call :cleanmem %mdmem% %callsect% &; endlocal
 errorcheck off
 if exist sd &; ls %source%/"%sd:~1%"/ > nul || goto :lsshow
@@ -748,7 +735,6 @@ cat --locate=\x00 --number=1 (md)%mdmem%+%callsect% > nul &; set /A pagelen=%?% 
 if not exist pagelen && set /A pagelen=%callsect% * 0x200 > nul &; set maxlen=%pagelen%
 cat --locate=\x3D --replace=\x3F --length=%pagelen% (md)%mdmem%+%callsect% > nul && set equation=Y
 cat --locate=% --replace=: --length=%pagelen% (md)%mdmem%+%callsect% > nul
-#OLTILDE#cat --locate=\x7E --length=%pagelen% (md)%mdmem%+%callsect% > nul && set tilde=Y
 if exist w && cat --locate=\x20&& --replace=\x20:: --length=%pagelen% (md)%mdmem%+%callsect% > nul
 if exist w && cat --locate=\x20&; --replace=\x20:: --length=%pagelen% (md)%mdmem%+%callsect% > nul
 if exist w && cat --locate=\x20;; --replace=\x20:: --length=%pagelen% (md)%mdmem%+%callsect% > nul
@@ -786,18 +772,14 @@ goto :lsshow
 cat (md)%mdmem%+%callsect% | call :lscopy
 :lsshow
 if not exist o && if %collumn%>=1 && if %collumn%<=%w:~3,1% && setlocal && set w= && call :pager "0" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
-#DEBUG#if not exist o && if %collumn%>=1 && if %collumn%<=%w:~3,1% && setlocal && set w= && call :pager "0" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo -n A %pagestat:~8%>=%pagestat:~4,4% c=%collumn% && echo
 if not exist o && if not %collumn%==%w:~3,1% && if %collumn%>=1 && setlocal && set w= && call :pager "0" "1" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
-#DEBUG#if not exist o && if not %collumn%==%w:~3,1% && if %collumn%>=1 && setlocal && set w= && call :pager "0" "1" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo -n B %pagestat:~8%>=%pagestat:~4,4% c=%collumn% r=%rows% && echo
 if not exist o && if %collumn%==0 && setlocal && set w= && call :pager "0" "1" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
-#DEBUG#if not exist o && if %collumn%==0 && setlocal && set w= && call :pager "0" "1" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo -n C %pagestat:~8%>=%pagestat:~4,4% c=%collumn% r=%rows% && echo
 if exist o && if %o:~0,4%==/o:d && if %files%==1 && if %collumn%>=1 && if %collumn%<=%w:~3,1% && setlocal && set w= && call :pager "0" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
 if exist o && if %o:~0,4%==/o:d && if %files%==1 && if not %collumn%==%w:~3,1% && if %collumn%>=1 && setlocal && set w= && call :pager "0" "1" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
 if exist o && if %o:~0,4%==/o:d && if %files%==1 && if %collumn%==0 && setlocal && set w= && call :pager "0" "1" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
 if exist o && if %o:~0,4%==/o:f && if %showdir%==1 && if %collumn%>=1 && if %collumn%<=%w:~3,1% && setlocal && set w= && call :pager "0" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
 if exist o && if %o:~0,4%==/o:f && if %showdir%==1 && if not %collumn%==%w:~3,1% && if %collumn%>=1 && setlocal && set w= && call :pager "0" "1" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
 if exist o && if %o:~0,4%==/o:f && if %showdir%==1 && if %collumn%==0 && setlocal && set w= && call :pager "0" "1" &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey% &; echo
-#DEBUG#setlocal && call :Fn.4 &; if %v%==0 && set vmin1=%v% ! set /a vmin1=%v%-1 &; call :Fn.5 50 %vmin1% &; echo -n %pagestat:~8%>=%pagestat:~4,4% collumn=%collumn% && call :Fn.5 0 %v% && endlocal
 if exist SFN && setlocal && set /A mdmem=%basemem%+11 > nul &; echo -n > (md)%mdmem%+28
 if exist SFN && endlocal
 if exist maxfiles && if %fcs%>=%maxfiles% && goto :eof
@@ -813,7 +795,6 @@ if not %b%==/b && if %lcopybyt%>=1024000 && call :divider %lcopybyt% 0x400 &; ca
 ## Deleted 'directory' in 'in directory' to make space and 'Files:' to 'File(s):'
 if exist echodir && if not exist file && if not %b%==/b && if not %w:~0,2%==/w &; if %lfcs%==0 |; call :pager "[Filesize: %lcopybyt%  In: %echodir%]" &; echo Filesize: %lcopybyt%  In:$[0x00]"$[0x07]%echodir%$[0x00]" && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 if exist SFN && if not exist file && if not exist echodir && if not %b%==/b && if not %w:~0,2%==/w &; if %lfcs%==0 |; call :pager "Filesize: %lcopybyt%  In: %srcsfn%%%sdsfn%/" &; echo Filesize: %lcopybyt%  In: %srcsfn%%%sdsfn%/ && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
-#DEBUG#setlocal && call :Fn.4 &; if %v%==0 && set vmin1=%v% ! set /a vmin1=%v%-1 &; call :Fn.5 50 %vmin1% &; echo -n :lscpa %pagestat:~8%>=%pagestat:~4,4% && call :Fn.5 0 %v% && endlocal
 if %pagestat:~8%>=%pagestat:~4,4% && setlocal && set w= && call :pager &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey%
 if %lfcs%>=1000 && call :thousandseparator "%lfcs%" &; if exist result && set lfcs=%result% && set result=
 if %lmsds%>=1000 && call :thousandseparator "%lmsds%" &; if exist result && set lmsds=%result% && set result=
@@ -822,10 +803,8 @@ if %lfcs%==0 && if %lmsds:~0,1%>=1 && if exist echodir && if not exist file && i
 if %lfcs%==0 && if %lmsds:~0,1%>=1 && if not exist echodir && if not exist file && if not %b%==/b && if not %w:~0,2%==/w &; call :pager "[Dir(s): %lmsds%  In:%sd%%%fulldir%/]" &; echo Dir(s): %lmsds%  In:$[0x00]"$[0x07]%sd%%%fulldir%/$[0x00]" && set ECHO=Y && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 if %lfcs%==0 && if %lmsds:~0,1%>=1 && if exist SFN && if not exist echodir && if not exist file && if not %b%==/b && if not %w:~0,2%==/w &; call :pager "Dir(s): %lmsds%  In: %srcsfn%%%sdsfn%/" &; echo Dir(s): %lmsds%  In: %srcsfn%%%sdsfn%/ && set ECHO=Y && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 if %lmsds%==0 && if %lfcs:~0,1%>=1 && if not exist file && if not %b%==/b && if not %w:~0,2%==/w && call :pager "echo File(s): %lfcs%" &; echo File(s): %lfcs% && set ECHO=Y && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
-#DEBUG#setlocal && call :Fn.4 &; if %v%==0 && set vmin1=%v% ! set /a vmin1=%v%-1 &; call :Fn.5 50 %vmin1% &; echo -n :lscpa %pagestat:~8%>=%pagestat:~4,4% && call :Fn.5 0 %v% && endlocal
 if %pagestat:~8%>=%pagestat:~4,4% && setlocal && set w= && call :pager &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey%
 if not exist q &; if %ECHO%==Y && set ECHO= && echo && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
-#DEBUG#setlocal && call :Fn.4 &; if %v%==0 && set vmin1=%v% ! set /a vmin1=%v%-1 &; call :Fn.5 50 %vmin1% &; echo -n :lscpa %pagestat:~8%>=%pagestat:~4,4% && call :Fn.5 0 %v% && endlocal
 endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey%
 ## Reset local counters later in :lssubdir; if no subdirectories found skip :lssubs
 if exist s && if not exist file && if not %parsedir%==0 && if %lmsds%==0 && set pagelen= && set maxlen= && goto :eof
@@ -834,13 +813,10 @@ if not exist s && if not %parsedir%==0 && if %lmsds%==0 && set pagelen= && set m
 if not exist s && if not exist y && if not exist dir && set pagelen= && set maxlen= && goto :eof
 set subdir=1 && set showdir=0 && set files=0
 set equation=
-#OLD#set equation= && set tilde=
 setlocal && call :cleanmem %mdmem% %callsect% &; endlocal
 errorcheck off
 if exist sd &; ls %source%/"%sd:~1%"/ > nul || set equation= && goto :eof
-#OLTILDE#if exist sd &; ls %source%/"%sd:~1%"/ > nul || set equation= && set tilde= && goto :eof
 if not exist sd &; ls %source%/ > nul || set equation= && goto :eof
-#OLTILDE#if not exist sd &; ls %source%/ > nul || set equation= && set tilde= && goto :eof
 if exist sd && ls %source%/"%sd:~1%"/ > (md)%mdmem%+%callsect%
 if not exist sd && ls %source%/ > (md)%mdmem%+%callsect%
 set pagelen=
@@ -852,8 +828,6 @@ if exist w && cat --locate=\x20&& --replace=\x20:: --length=%pagelen% (md)%mdmem
 if exist w && cat --locate=\x20&; --replace=\x20:: --length=%pagelen% (md)%mdmem%+%callsect% > nul
 if exist w && cat --locate=\x20;; --replace=\x20:: --length=%pagelen% (md)%mdmem%+%callsect% > nul
 if exist w && cat --locate=\x20! --replace=\x20: --length=%pagelen% (md)%mdmem%+%callsect% > nul
-#OLTILDE#cat --locate=\x7E --length=%pagelen% (md)%mdmem%+%callsect% > nul && set tilde=Y
-#OLTILDE#cat --locate=\x7E (md)%mdmem%+%callsect% > nul && set tilde=Y
 if not %pagelen%==%maxlen% && goto :nospace2 ! set maxlen=
 set numspace= && set numlspac= && set endspace= && set lspace=
 cat --skip=0x1FD00 --locate=\x20 (md)%mdmem%+%callsect% > nul
@@ -880,12 +854,10 @@ set numspace= && set numlspac= && set endspace= && set lspace=
 if not exist lcalllen && goto :nospace2
 cat --length=%lcalllen% (md)%mdmem%+%callsect% | call :lscopy
 set lcalllen= && set equation=
-#OLTILDE#set lcalllen= && set equation= && set tilde=
 goto :eof
 :nospace2
 cat --length=%pagelen% (md)%mdmem%+%callsect% | call :lscopy
 set equation= && set pagelen= && set maxlen=
-#OLTILDE#set equation= && set tilde= && set pagelen= && set maxlen=
 goto :eof
 ::
 :lscopy
@@ -898,15 +870,13 @@ if exist maxfiles && if %subdir%==0 && if %fcs%>=%maxfiles% && set "echodir=%ech
 if exist maxbyte && if %subdir%==0 && if %copybyt%>=%maxbyte% && set "echodir=%echodir%" && goto :eof
 set arg= && set larg= && set argname= && set largname= && set argext= && set largext= && set filesize= && set nulsize= && set zeromsg= && set zero2msg=
 set fulldir= && set sfndir= && set sfnfile= && set nulsize= && set emdirfil= && set argsize= && set cmdlen= && set lfncatch= && set semilen=
-##OLTILDE##set fulldir= && set sfndir= && set sfnfile= && set nulsize= && set emdirfil= && set argsize= && set cmdlen= && set lfncatch= && set argtilde= && set semilen=
-##OLTILDE##set tilde=
 set line=
 set "arg=%1"
 set "argname=%~n1"
 set "argext=%~x1"
 set lfncatch=0
 ## Test max command-line length
-set cmdline= ;; set "cmdline=%source%%%sd%/%arg%" ;; set cmdlen=%@retval% ;; set /a cmdlen=%cmdlen% > nul
+set "cmdline=%source%%%sd%/%arg%" &; echo -e "%cmdline%" | set cmdline= &; set "cmdline=%cmdline:~1,-1%" &; set /a cmdlen=%@retval% > nul
 if not exist w && if %cmdlen%>=261 && call :pager "[omit %cmdline%]" "2" &; echo -e $[0x0F]Error: commandline is too long && echo omit "%cmdline%" && echo && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && set cmdline= && set cmdlen= && goto :skip1
 if exist w && if %cmdlen%>=261 && call :pager "[omit %cmdline%]" "2" &; echo $[0x0F]Error: commandline is too long && echo omit "%cmdline%" && echo && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && set cmdline= && set cmdlen= && goto :skip1
 set cmdline= && set cmdlen=
@@ -927,16 +897,9 @@ if not exist sd && raw cat --length=0 %source%/"%arg%" | set filesize=
 debug 0
 errorcheck on
 if exist filesize && set /a argsize=%filesize:~12% > nul && if "%filesize:~14%"=="0" && set filesize=0 && set "zeromsg=$[0x08]zero-byte file"
-if not exist filesize && set nulsize=0 > nul && set fulldir=%arg%
+if not exist filesize && set nulsize=0 > nul && set "fulldir=%arg%"
 if "%sourceok%"=="NTFS" && if %filesize%==0 && set "fulldir=%arg%" && set "zero2msg=$[0x08]zero-byte file/empty directory" && set filesize= && set zeromsg= && set nulsize=0
 set filesize=
-#OLTILDE#if %tilde%==Y && if exist LFN && if not %w:~0,2%==/w && if not %b%==/b && set argtilde=
-#OLTILDE#if %tilde%==Y && if exist LFN && if not %w:~0,2%==/w && if not %b%==/b && echo -n > (md)%basemem%+1
-#OLTILDE#if %tilde%==Y && if exist LFN && if not %w:~0,2%==/w && if not %b%==/b && echo "%arg%" > (md)%basemem%+1
-#OLTILDE#if %tilde%==Y && if exist LFN && if not %w:~0,2%==/w && if not %b%==/b && cat --skip=2 --locate=\x7E --length=6 (md)%basemem%+1 > nul && call :argtilde
-#OLTILDE#if %tilde%==Y && if exist LFN && if not %w:~0,2%==/w && if not %b%==/b && echo -n > (md)%basemem%+1
-#OLTILDE#if exist argtilde && if exist fulldir && if not exist SFN && if not %w:~0,2%==/w && if not %b%==/b && set %casearg% "argtilde=/%argtilde%/"
-#OLTILDE#if exist argtilde && if not exist fulldir && if not exist SFN && if not %w:~0,2%==/w && if not %b%==/b && set %casearg% "argtilde=%argtilde%"
 ## Remove file-number suffix in case of ISO/UDF, except switch /semicol is used (removes VAR 'semicol')
 if exist semicol && if not exist fulldir && echo -n > (md)%basemem%+1
 if exist semicol && if not exist fulldir && echo "%arg%" > (md)%basemem%+1
@@ -1012,16 +975,12 @@ if exist SFN && if exist sfndir && set fulldir=%sfndir% && set sfndir=
 if exist SFN && if exist sfnfile && set arg=%sfnfile% && set sfnfile=
 ## Modified to show directories without /s
 if exist file && if exist direcho && if exist s && if not exist b && if not exist w && call :pager "0" &; echo && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
-#DEBUG#setlocal && call :Fn.4 &; endlocal && set line=%v% && set /a vmax=%pagestat:~4,4%-1 > nul &; if %line%>=1 && set /a line=%line%-1 > nul ! echo && set line=0
-#ORG#
-#BAD#if %direcho3%==1 && echo && set direcho3=
 setlocal && call :Fn.4 &; endlocal && set line=%v% &; if %line%>=1 && set /a line=%line%-1 > nul ! echo && set line=0
 setlocal
 ## Deleted 'Directory: ' to make more space for LFN with /lfn
 if exist direcho && set direcho3=
 if exist file && if not exist b && if exist w && if exist direcho && set direcho= && set direcho2=1 && call :pager "[%echodir%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%echodir%$[0x00]" && set /a line=%line%+1 > nul &; if not %line%>=%pagestat:~4,4% && call :Fn.5 "0" "%line%" ! set /a line=%line%-1 > nul &; setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 if exist file && if not exist b && if not exist w && if exist direcho && if not %tilde%==Y && set direcho= && set direcho2=1 && call :pager "[%echodir%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%echodir%$[0x00]" && set /a line=%line%+1 > nul &; if not %line%>=%pagestat:~4,4% && call :Fn.5 "0" "%line%" ! set /a line=%line%-1 > nul &; setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
-#OLTILDE#if exist file && if not exist b && if not exist w && if exist direcho && if %tilde%==Y && set direcho= && set direcho2=1 && call :pager "[%echodir% %sdlfn%/]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%echodir%  $[0x08]%sdlfn%/$[0x00]" && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 endlocal && set "direcho=%direcho%" && set pagestat=%pagestat% && set pagerkey=%pagerkey% && set line=%line%
 ## not needed with 'y'-standalone?
 if %emdirfil%==1 && if %b%==/b && if not exist s && if %showdir%==1 && setlocal && set "arg=[%fulldir%]" &; call :lsspace &; endlocal && set "spaces=%spaces%" &; call :pager "[%spaces%%%zero2msg%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%spaces%%%zero2msg%$[0x00]" && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% &; goto :skip1
@@ -1037,17 +996,13 @@ if not exist fulldir && if %b%==/b && if exist s && if exist dir && if %files%==
 if %b%==/b && goto :skip1
 if %w:~0,2%==/w && goto :lswide
 if %emdirfil%==1 && setlocal && set "arg=%fulldir%" &; call :lsspace &; endlocal && set "spaces=%spaces%" &; call :pager "[%spaces% %zero2msg%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%spaces% %zero2msg%$[0x00]" && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% &; set /a sdsk=%sdsk%+1 > nul && goto :skip1
-#OLTILDE#if exist fulldir && if %showdir%==1 && if exist argtilde && call :makespace "<%fulldir%>" "50" "after" &; if exist result && set "fulldir=%result%" && set result=
-#OLTILDE#if exist fulldir && if %showdir%==1 && if exist argtilde && call :pager "[%fulldir%%%argtilde%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%fulldir%$[0x08]%argtilde%$[0x00]" && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% &; set /a msds=%msds%+1 > nul && set /a lmsds=%lmsds%+1 > nul && goto :skip1
 if exist fulldir && if %showdir%==1 && if not exist argtilde && call :pager "[<%fulldir%>]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]<%fulldir%>$[0x00]" && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% &; set /a msds=%msds%+1 > nul && set /a lmsds=%lmsds%+1 > nul && goto :skip1
 if not exist fulldir && if %files%==1 && call :lsspace &; set "arg=%spaces%"
 setlocal
 if not exist fulldir && if %files%==1 && if %argsize%>=1000 && call :thousandseparator "%argsize%" "," &; if exist result && set argsize=%result% && set result=
 if not exist fulldir && if exist argsize && call :makespace "%argsize%" "13" &; if exist result && set argsize=%result% && set result=
 if not exist fulldir && if exist file && if %files%==1 && if exist arg && call :pager "[%arg% %argsize%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%arg% %argsize%$[0x00]" && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && set pagerkey=%pagerkey% && goto :lloopend
-#OLTILDE#if not exist fulldir && if exist file && if %files%==1 && if exist arg && call :pager "[%arg% %argsize%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%arg% %argsize%$[0x08]  %argtilde%$[0x00]" && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && set pagerkey=%pagerkey% && goto :lloopend
 if not exist fulldir && if %files%==1 && if exist arg && call :pager "[%arg% %argsize%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%arg% %argsize%$[0x00]" && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && set pagerkey=%pagerkey% && goto :lloopend
-#OLTILDE#if not exist fulldir && if %files%==1 && if exist arg && call :pager "[%arg% %argsize%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" &; echo -e $[0x00]"$[0x07]%arg% %argsize%$[0x08]  %argtilde%$[0x00]" && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && set pagerkey=%pagerkey% && goto :lloopend
 endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey%
 if not %w:~0,2%==/w && goto :lloopend
 ## Case of Wide (/w)
@@ -1066,7 +1021,6 @@ if %files%==1 && set /a lfcs=%lfcs%+1 > nul && set /a fcs=%fcs%+1 > nul && set l
 shift
 set line=
 if exist dirsize && if %lfcs%>=%dirsize% && set "echodir=%echodir%" && goto :eof
-#DEBUG#setlocal && call :Fn.4 &; if %v%==0 && set vmin1=%v% ! set /a vmin1=%v%-1 &; call :Fn.5 50 %vmin1% &; echo -n :lscpa %pagestat:~8%>=%pagestat:~4,4% && call :Fn.5 0 %v% && endlocal
 if %pagestat:~8%>=%pagestat:~4,4% && setlocal && set w= && call :pager &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey%
 if %p%==/p &; if not %pagerkey%==0x51 if not %pagerkey%==0x71 || goto :eof
 goto :lscopy
@@ -1075,11 +1029,10 @@ goto :lscopy
 if exist maxfiles && if %fcs%>=%maxfiles% && goto :eof
 if exist maxbyte && if %copybyt%>=%maxbyte% && goto :eof
 if %p%==/p &; if not %pagerkey%==0x51 if not %pagerkey%==0x71 || goto :eof
-#debug#if %p%==/p &; if not %pagerkey%==0x51 if not %pagerkey%==0x71 || echo -n :lssubdir pagerkey=%pagerkey% && goto :eof
 setlocal
 set nulsize= && set cmdlen= && set gotomsg=
 ## Max cmd-length with room for one filename
-set cmdlen= ;; set cmdline= ;; set "cmdline=%source%%%sd%/%fulldir%" ;; set "cmdlen=%@retval%" &; set /a cmdlen=%cmdlen% > nul
+set "cmdline=%source%%%sd%/%fulldir%" &; echo -e "%cmdline%" | set cmdline= &; set "cmdline=%cmdline:~1,-1%" &; set /a cmdlen=%@retval% > nul
 if not exist w && if %cmdlen%>=248 && call :pager "%cmdline%" "2" &; echo && echo $[0x0F]Error: commandline is too long && echo omit directory "%cmdline%" && echo && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && set cmdline= && set cmdlen= && goto :lskipmcd
 if exist w && if %cmdlen%>=248 && call :pager "%cmdline%" "2" &; echo && echo $[0x0F]Error: commandline is too long && echo omit directory "%cmdline%" && echo && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && set cmdline= && set cmdlen= && goto :lskipmcd
 set cmdline= && set cmdlen=
@@ -1103,20 +1056,14 @@ if not exist q && if exist s && if not exist LF && if /i "%fulldir%"=="lost+foun
 if not exist SFN && if exist q && if not exist LF && if /i "%fulldir%"=="lost+found" && if not %lfncatch%==1 && goto :lsendloc
 if exist SFN && if not exist q && if exist s && if not exist LF && if /i "%fulldir%"=="lost+found" && call :pager "Skip directory lost_f~1" &; echo Skip directory lost_f~1 && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum% && goto :lsendloc
 :mdall
-#DEBUG#if exist z && if exist s && call Fn.11 "%arg%" "testlfn" && echo echo :lssubdir z=%z% s=%s% "if exist z && if exist s && set gotomsg= &; setlocal && set /u "argname=%~n1" && set /u "argext=%~x1" && call :testzdir "goto :lsendloc" "set arg=%sd%/%fulldir%" &; endlocal && set "gotomsg=%gotomsg%"
 if exist z && if exist s && set gotomsg= &; setlocal && set /u "argname=%~n1" && set /u "argext=%~x1" && call :testzdir "goto :lsendloc" "set arg=%sd%/%fulldir%" &; endlocal && set "gotomsg=%gotomsg%"
-#DEBUG#if exist z && call Fn.11 "%arg%" "testlfn" && echo :lssubdir z=%z% "if exist z && if not exist s && set gotomsg= &; setlocal && set /u "argname=%~n1" && set /u "argext=%~x1" && call :testzdir "goto :lsendloc" &; endlocal && set "gotomsg=%gotomsg%"
 if exist z && if not exist s && set gotomsg= &; setlocal && set /u "argname=%~n1" && set /u "argext=%~x1" && call :testzdir "goto :lsendloc" &; endlocal && set "gotomsg=%gotomsg%"
 if exist z && if exist gotomsg &; %gotomsg%
-#DEBUG#if exist y && call Fn.11 "%arg%" "testlfn" && echo A :lssubdir y=%y% "if not exist z && if not exist SFN && if exist y && if not "%y:~1,1%"=="-" && set gotomsg= && setlocal && set dir= && call :testydir "goto :lskipmcd" "set %casearg% sd=%sd%/%fulldir%" &; endlocal && set "gotomsg=%gotomsg%" &; if exist gotomsg && %gotomsg%
 if not exist SFN && if exist y && if not "%y:~1,1%"=="-" && set gotomsg= && setlocal && set dir= && call :testydir "goto :lskipmcd" "set %casearg% sd=%sd%/%fulldir%" &; endlocal && set "gotomsg=%gotomsg%" &; if exist gotomsg && set z= && %gotomsg%
-#DEBUG#if exist y && call Fn.11 "%arg%" "testlfn" && echo B :lssubdir z=%z% y=%y% "if not exist z && if not exist SFN && if exist y && if not "%y:~1,1%"=="-" && set gotomsg= && setlocal && set dir= && call :testydir "goto :lskipmcd" "set %casearg% sd=%sd%/%fulldir%" &; endlocal && set "gotomsg=%gotomsg%" &; if exist gotomsg && %gotomsg%
 if exist SFN && if exist y && if not "%y:~1,1%"=="-" && set gotomsg= && setlocal && set dir= && call :testydir "goto :lskipmcd" "set /u sd=%sdsfn%/%sfndir%" &; endlocal && set "gotomsg=%gotomsg%" &; if exist gotomsg && %gotomsg%
 if not exist y if not exist z |; set "Z=%z%" && if exist y && if not "%y:~1,1%"=="-" && set /u "Y=%y:~3%" &; if %Y:~-1,1%==* && set "Y=%Y:~0,-1%"
-#DEBUG#
 if exist y && if not "%y:~1,1%"=="-" && set y=
 set z=
-#DEBUG#set /u fnarg=%arg% &; call Fn.11 "%fnarg%" "TESTLF" && echo C :lssubdir z=%z% y=%y% Z=%Z% Y=%Y% "if not exist z && if exist y && if not "%y:~1,1%"=="-" && set y=
 ## Still needed with 'dirsize'!
 if not exist SFN && setlocal && set "echofile=%source%%%sd%/%fulldir%" && call :nolspace &; endlocal && set "echodir=%echofile%"
 if exist SFN && set "echodir=%srcsfn%%%sdsfn%/%sfndir%/"
@@ -1124,7 +1071,6 @@ if not exist SFN && set "echodir=%echodir%/"
 if exist Y && set /u "Z=%echodir%" &; call Fn.11 "%Z%" "%Y%" || goto :lskipmcd
 setlocal
 if %msds%==0 && if %fcs%==0 && if not exist q && if not exist b && if not exist file &; if not exist Y if not exist Z || echo && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
-#OLTILDE#if not exist q && if exist LFN && if not exist b && if not exist w &; if exist argtilde && set "echodir=%echodir%  $[0x08]%sdlfn%%%argtilde%" && set "sdlfn=%sdlfn%/%argtilde:~1,-1%" ! set "sdlfn=%sdlfn%/%fulldir%" && call Fn.11 "%source%%%sd%" "~" && set "echodir=%echodir%  $[0x08]%sdlfn%/%fulldir%/"
 setlocal && call :Fn.4 &; endlocal && set line=%v% &; if %line%>=1 && set /a line=%line%-1 > nul ! echo && set line=0
 if not exist q && if exist b && if not exist s && if not exist file && if exist echodir && call :pager "[%echodir%]" &; call :Fn.5 "%pagestat:~0,4%" "%line%" && echo -e $[0x00]"$[0x07]%echodir%$[0x00]" && setlocal && set /a linenum=%pagestat:~8%+1 > nul &; endlocal && set pagestat=%pagestat:~0,8%%%linenum%
 ## Deleted 'Directory: ' to make more space for LFN with /lfn
@@ -1133,7 +1079,6 @@ endlocal && set "sdlfn=%sdlfn%" && set pagestat=%pagestat% && set pagerkey=%page
 :lskipmcd
 if %pagestat:~8%>=%pagestat:~4,4% && setlocal && set w= && call :pager &; endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey%
 if %p%==/p &; if not %pagerkey%==0x51 if not %pagerkey%==0x71 || goto :lsendloc
-#debug#if %p%==/p &; if not %pagerkey%==0x51 if not %pagerkey%==0x71 || echo -n :lskipmcd pagerkey=%pagerkey% && goto :lsendloc
 set Y= && set Z=
 set gotomsg=
 set "sd=%sd%/%fulldir%"
@@ -1406,15 +1351,16 @@ shift
 goto :dosnogo
 ::
 :lfn2sfn
-setlocal && set * && set basemem=%basemem% && set "arg=%arg%" && set "argname=%argname%" && set "argext=%argext%" && set "fulldir=%fulldir%" && set srcsfn=%srcsfn% && set sdsfn=%sdsfn% && set case=%case% && set "subdir=%subdir%" && set "semicol=%semicol%"
+setlocal && set * && set basemem=%basemem% && set "arg=%arg%" && set "argname=%argname%" && set "argext=%argext%" && set "fulldir=%fulldir%" && set "srcsfn=%srcsfn%" && set "sdsfn=%sdsfn%" && set case=%case% && set "subdir=%subdir%" && set "semicol=%semicol%"
 if exist semicol && if not exist fulldir && set "argname=%~n1"
 if exist semicol && if not exist fulldir && set "argext=%~x1"
 echo -n > (md)%basemem%+1
 echo $[0x07]%argname% > (md)%basemem%+1
-setlocal && set file2= &; call :cleanlfn &; endlocal && set argname=%file2% && set file2=
+setlocal && set file2= &; call :cleanlfn &; endlocal && set "argname=%file2%" && set file2=
 echo -n > (md)%basemem%+1
 echo $[0x07]%argname% > (md)%basemem%+1
-set argname=%argname% &; set /a largname=%@retval% > nul
+set "argname=%argname%" &; set /a largname=%@retval% > nul
+set lfile2=%largname%
 set "nogo="*+,\:;<>?[]"
 call :dossubst nogo:~0,1 nogo:~1,1 nogo:~2,1 nogo:~3,1 nogo:~4,1 nogo:~5,1 nogo:~6,1 nogo:~7,1 nogo:~8,1 nogo:~9,1 nogo:~10,1 nogo:~11,1
 set /u "argname=%file2%" && set file2= && set lfile2=
@@ -1424,16 +1370,16 @@ set largname=
 set "argname=%argname%" &; set /a largname=%@retval% > nul
 echo -n > (md)%basemem%+1
 echo $[0x07]%argext% > (md)%basemem%+1
-setlocal && set file2= &; call :delspace &; endlocal && set argext=%file2% && set file2=
+setlocal && set file2= &; call :delspace &; endlocal && set "argext=%file2%" && set file2=
 echo -n > (md)%basemem%+1
 echo $[0x07]%argext% > (md)%basemem%+1
 set largext=
 set "argext=%argext%" &; set /a largext=%@retval% > nul
-lfile2=%largext%
+set lfile2=%largext%
 set "nogo="*+=,\:;<>?[]"
 call :dossubst nogo:~0,1 nogo:~1,1 nogo:~2,1 nogo:~3,1 nogo:~4,1 nogo:~5,1 nogo:~6,1 nogo:~7,1 nogo:~8,1 nogo:~9,1 nogo:~10,1 nogo:~11,1 nogo:~12,1
-set file2=%file2%
-set /u argext=%file2% && set file2= && set lfile2=
+set "file2=%file2%"
+set /u "argext=%file2%" && set file2= && set lfile2=
 if %largext%>=5 && set argext=%argext:~0,4%
 :tildenum
 if %subdir%==0 && if %tildenum%==10 && set argname=%argname:~0,-1%
@@ -1446,7 +1392,7 @@ if %subdir%==0 && set tildemsg= && setlocal && set /A mdmem=%basemem% + 11 > nul
 if %subdir%==0 && endlocal && set tildemsg=%tildemsg% &; if %tildemsg%==Y && set /a tildenum=%tildenum% + 1 > nul && goto :tildenum
 if %subdir%==1 && if "%arg%"=="%fulldir%" && set tildemsg= && call :sfnpath
 if %subdir%==1 && if "%arg%"=="%fulldir%" && if %tildemsg%==Y && set /a tildenum=%tildenum% + 1 > nul && goto :tildenum
-## Tested with position13300
+## Tested with position 13300
 if %subdir%==0 && set zero= && setlocal && set /A mdmem=%basemem% + 11 > nul &; cat --skip=14001 --locate=\x00 --length=1 (md)%mdmem%+28 > nul || set "zero=N" && echo position 14001 not 00 && pause Press key to continue (TESTMODE)
 if %subdir%==0 && if %zero%==N && echo -n > (md)%mdmem%+28
 if %subdir%==0 && endlocal
@@ -1500,9 +1446,9 @@ set skipkbyt=
 goto :eof
 ::
 :dossubst
-if "%1"=="" && cat --length=%lfile2% (md)%basemem%+1 | set file2=
-if "%1"=="" && echo -n > (md)%basemem%+1
-if "%1"=="" && goto :eof
+if "%~1"=="" && cat --length=%lfile2% (md)%basemem%+1 | set file2=
+if "%~1"=="" && echo -n > (md)%basemem%+1
+if "%~1"=="" && goto :eof
 set "message=%%%1%"
 set file2=
 ## '_' = 5F
@@ -1511,9 +1457,9 @@ shift
 goto :dossubst
 ::
 :sfnpath
-setlocal && set * && set basemem=%basemem% && set srcsfn=%srcsfn% && set sdsfn=%sdsfn% && set file2=%file2% && set lfile2=%lfile2%
+setlocal && set * && set basemem=%basemem% && set "srcsfn=%srcsfn%" && set "sdsfn=%sdsfn%" && set "file2=%file2%" && set lfile2=%lfile2%
 set /A mdmem=%basemem% + 40 > nul
-set sfnpath=%srcsfn%%%sdsfn%/%file2%
+set "sfnpath=%srcsfn%%%sdsfn%/%file2%"
 set pathlen=%@retval% &; set /a pathlen=%pathlen% > nul
 set srcsfn= && set sdsfn=
 set skip=0
@@ -1695,8 +1641,7 @@ if not exist sd && raw cat --length=0 %source%/"%argtilde%" &; set tildelen=%@re
 set /a tildelen=%tildelen% &; if %tildelen%>=256 && set argtilde=
 if exist argtilde && cat --length=%tildelen% %source%%%sd%/%argtilde% | set argtilde=
 ## NOT always first two chars of SFN and LFN equal!
-#BAD#if not /i %arg:~0,2%==%argtilde:~0,2% && set argtilde=
-endlocal && set argtilde=%argtilde%
+endlocal && set "argtilde=%argtilde%"
 goto :eof
 ::
 :notilde
@@ -1878,33 +1823,19 @@ set "echodir=%~1"
 echo -e "%echodir%" | set echodir= &; set "echodir=%echodir:~1,-1%"
 set /a echolen=%@retval% > nul
 set /a echonums=%~2
-#DEBUG#if exist w && if %subdir%==1 && setlocal && call :Fn.4 &; call :Fn.5 50 %v% &; echo -n %pagestat% e=%echolen% h=%h% v=%v% c=%collumn% r=%rows% && pause && call :Fn.5 %h% %v% && endlocal
 if exist w &; call :Fn.4
 if exist w &; if not exist echodir && set w= ! if %subdir%==1 && set w=
 if exist w &; if not exist collumn && set echonums=1 ! if %collumn%==0 && set echonums=1
 if exist w &; set /a echolen=%h%+%echolen% > nul
 if exist w &; set /a linenum=%echolen%/%pagestat:~0,4%+%pagestat:~8%+%echonums% > nul
-#DEBUG#if exist w &; if %pagestat:~8%>=%pagestat:~4,4% && if not %h%==0 && if not %h%>=%pagestat:~0,4% && echo %h%>=%pagestat:~0,4% collumn=%collumn% && set h=0 && set collumn=0
 if not exist w && call :Fn.4
-#DEBUG#if %subdir%==1 && call :Fn.5 48 %v% && echo -n linenum=%echolen%-1/%pagestat:~0,4%+%pagestat:~8%+%echonums% && pause && call :Fn.5 %h% %v%
 if not exist w && if %h%==%pagestat:~0,4% &; set /a linenum=%echolen%-1/%pagestat:~0,4%+%pagestat:~8%+%echonums% > nul
 if not exist w && if not %h%==%pagestat:~0,4% &; set /a linenum=%echolen%/%pagestat:~0,4%+%pagestat:~8%+%echonums% > nul
-#wOKEifNOTsubdir=1#if exist w &; if %pagestat:~8%>=%pagestat:~4,4% && echo -n $[0x0F][Hit Q to quit, any other key to continue] w=%w% files=%files% subdir=%subdir% showdir=%showdir% && pause --wait=180 --test-key &; set /A key=%@retval% > nul
 if exist w &; if %h%==0 && set vorg=%v% &; if %linenum%>=%pagestat:~4,4% && echo -n $[0x0F][Hit Q to quit, any other key to continue] && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
-#DEBUG#if exist w &; if %h%==0 && set vorg=%v% &; if %linenum%>=%pagestat:~4,4% && echo -n $[0x0F][Hit Q to quit, any other key to continue] A %linenum%>=%pagestat:~4,4% && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
 if exist w &; if %h%==%pagestat:~0,4% && set vorg=%v% && set /a v=%v%+1 > nul &; if %linenum%>=%pagestat:~4,4% && call :Fn.5 0 %v% &; echo -n $[0x0F][Hit Q to quit, any other key to continue] && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
-#DEBUG#if exist w &; if %h%==%pagestat:~0,4% && set vorg=%v% && set /a v=%v%+1 > nul &; if %linenum%>=%pagestat:~4,4% && echo -n h=%h% v=%v% && call :Fn.5 0 %v% &; echo -n $[0x0F][Hit Q to quit, any other key to continue] A %linenum%>=%pagestat:~4,4% && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
 if exist w &; if not %h%==0 && if not %h%==%pagestat:~0,4% && set vorg=%v% && set /a v=%v%+1 > nul &; if %linenum%>=%pagestat:~4,4% && call :Fn.5 0 %v% &; echo -n $[0x0F][Hit Q to quit, any other key to continue] && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
-#DEBUG#if exist w &; if not %h%==0 && if not %h%==%pagestat:~0,4% && set vorg=%v% && set /a v=%v%+1 > nul &; if %linenum%>=%pagestat:~4,4% && call :Fn.5 0 %v% &; echo -n $[0x0F][Hit Q to quit, any other key to continue] B %linenum%>=%pagestat:~4,4% && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
-#DEBUG#if exist w &; if not %pagestat:~8%<=%pagestat:~4,4% && echo -n $[0x0F][Hit Q to quit, any other key to continue] w=%w% subdir=%subdir% showdir=%showdir% files=%files% && pause --wait=180 --test-key &; set /A key=%@retval%&0xff > nul
-#DEBUG#if %subdir%==1 && call :Fn.5 69 %v% && echo -n linenum=%linenum% && pause && call :Fn.5 %h% %v%
 if not exist w &; if %h%==%pagestat:~0,4% && set vorg=%v% && set /a v=%v%+1 > nul && if %linenum%>=%pagestat:~4,4% && echo -n $[0x00]"$[0x0F][Hit Q to quit, any other key to continue]$[0x00]" && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
-#DEBUG#if not exist w &; if %h%==%pagestat:~0,4% && set vorg=%v% && set /a v=%v%+1 > nul && if %linenum%>=%pagestat:~4,4% && echo -n $[0x00]"$[0x0F][Hit Q to quit, any other key to continue]$[0x00]"A w=%w% && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
-#DEBUG#if not exist w &; if %h%==%pagestat:~0,4% && set /a v=%v%+1 > nul && if %pagestat:~8%>=%pagestat:~4,4% && echo -n $[0x00]"$[0x0F][Hit Q to quit, any other key to continue]$[0x00]"subdir=%subdir% showdir=%showdir% && pause --wait=180 --test-key &; set /A key=%@retval%&0xff > nul
-#wOKEifsubdir=1#
 if not exist w &; if not %h%==%pagestat:~0,4% && set vorg=%v% && if %linenum%>=%pagestat:~4,4% && echo -n $[0x0F][Hit Q to quit, any other key to continue] && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
-#DEBUG#if not exist w &; if not %h%==%pagestat:~0,4% && set vorg=%v% && if %linenum%>=%pagestat:~4,4% && echo -n $[0x0F][Hit Q to quit, any other key to continue]B w=%w% && pause --wait=180 --test-key &; set /A pagerkey=%@retval%&0xff > nul
-#DEBUG#if not exist w &; if not %h%==%pagestat:~0,4% && if %pagestat:~8%>=%pagestat:~4,4% && echo -n $[0x0F][Hit Q to quit, any other key to continue] subdir=%subdir% showdir=%showdir% && pause --wait=180 --test-key &; set /A key=%@retval%&0xff > nul
 if %linenum%>=%pagestat:~4,4% && call :Fn.5 0 %v% && echo -n -e \x20                                          \x20 && call :Fn.5 0 %vorg%
 if %linenum%>=%pagestat:~4,4% && set /a linenum=%linenum%-%pagestat:~4,4% > nul ! set linenum=%linenum% &; set pagestat=%pagestat:~0,8%%%linenum%
 endlocal && set pagestat=%pagestat% && set pagerkey=%pagerkey%
@@ -1937,7 +1868,7 @@ if "%~1"=="smallhelp" && echo Example FATLSDIR.G4B /w /s
 if "%~1"=="smallhelp" && echo Example FATLSDIR.G4B (hd0,0)/WINDOWS/MS*.DLL /s
 if "%~1"=="smallhelp" && echo Example FATLSDIR.G4B (hd0,0)/Program\ Files/ /dirsize:4 /a:-d /s /f /lfn && goto :eof
 clear && pager on
-echo FATLSDIR.G4B v0.1 (20241009), by deomsh
+echo FATLSDIR.G4B v0.2 (20250730), by deomsh
 echo Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'
 echo FATLSDIR.G4B [--mdbase=sector] [DEVICE][/PATH/][FILE] switches
 echo FATLSDIR.G4B /? (this screen)
@@ -1953,12 +1884,12 @@ echo FILE accepts wildcard: '*' in END of Name & END of Extension (NOT: '?' )
 echo Key 'Escape' can be used to interrupt parsing (with quit/ continue dialog)
 echo *  Default verbose DIR: DIR & output messages too
 echo ** FAT-DIR parsing needs 0x1000 total memory (2MB) - LS-DIR 0x200 (512KB)
-echo ** Lowest value 0x3000 - forbidden: 0x3001-0xD460 and 0x12000-0x12FFF && echo
-echo 3* FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE not /FILE!)
+echo ** Lowest value 0x3000 - forbidden: 0x3001-0xD460 and 0x12000-0x12FFF
+echo 3* FILE without DEVICE/PATH/ => before FILE no '/' allowed (FILE is NOT /FILE!)
 echo 3* Without FILE full directory will be shown (*.* is NOT needed)
 echo File versions: Grubutil FAT and Grub4Dos 0.4.6a, Grub4dos for UEFI (watch FAT!)
 echo Found not compatible with Grub4Dos 0.4.5b / Grub4Dos 0.4.5c / Grub4efi textmode
-echo FAT needed, searched in %^~dp0, (bd), ROOT: /, /boot/grub/, /grub/ and /g4dll/
+echo FAT needed, searched in %^~dp0, (bd), ROOT: /, /boot/grub/, /grub/ and /g4dll/ && echo
 if not exist @uefi && setlocal && set * && call :lastkey &; if not %lastkey%==0x51 && if not %lastkey%==0x71 && endlocal ! endlocal && goto :eov
 echo General switches: /s[:n] /o:d|f /b /w:[n] /p /q /[-]x:~ /[-]y:DIR
 echo /s[:n] = parse max 18 subdirectories deep: with /s:1-18 choice 1-18 levels
@@ -2004,7 +1935,6 @@ echo *  Case-sensitive in PATH/FILE and /[-]x: and /[-]y: with EXT2/3/4/ReIseR(2
 echo ** LFN in PATH/FILE with spaces between "quotes" or use escaped '\ ' ('\=' too)
 echo 3* (Self-declared) Experts only! $-(meta)files can grow above 4GB && echo
 if not exist @uefi && setlocal && set * && call :lastkey &; if not %lastkey%==0x51 && if not %lastkey%==0x71 && endlocal ! endlocal && goto :eov
-echo
 echo Special Switches: /nocase /dirsize:n /maxfiles:N /maxbyte:n /size:n
 echo /nocase = set case-sensitive File Systems to case-insensitive
 echo /semicol = do not remove file-number suffixes, on ISO-9660 and UDF only
@@ -2015,7 +1945,8 @@ echo /size:n = only files with filesize 'n' bytes showed - takes 'nk/nm' bytes t
 echo *  /a:-d is auto-set (not working with: /a:[-]d[-]a[-]r[-]s[-]h and /a:[-]d)
 if not exist @uefi && setlocal && set * && call :lastkey &; if not %lastkey%==0x51 && if not %lastkey%==0x71 && endlocal ! endlocal && goto :eov
 echo
-echo Remark: Grud4dos for UEFI soon 'out of malloc memory' (latest version 20240901)
+echo Remark: FAT not unloaded afterwards if already loaded with insmod
+echo Grud4dos for UEFI soon 'out of malloc memory' (latest version 20240901)
 if not exist @uefi && setlocal && set * && call :lastkey &; if not %lastkey%==0x51 && if not %lastkey%==0x71 && endlocal ! endlocal && goto :eov
 echo More convenient => insmod DEVICE/PATH/FATLSDIR.G4B DIR (watch loading FAT!) && echo
 ## echo Based on copyFF.bat (:cpa & :copyfiles & :sub-dir => originator of call's seems to be Chenall)
@@ -2042,8 +1973,6 @@ echo Example FATLSDIR.G4B (hd0,0) /maxbyte:64m /s
 echo Example FATLSDIR.G4B (hd0,0)/WINDOWS/ /size:0 /s /lfn
 ::
 :eov
-pager %pagersts%
-debug %debugsts%
 goto :end
 ::
 :exit
@@ -2051,10 +1980,10 @@ setlocal && call :cleanmem %basemem% %callsect% &; endlocal
 if not exist ls && setlocal && call :cleanmem %mdmem% %ddifsect% &; endlocal
 if exist ls && setlocal && call :cleanmem %mdmem% %callsect% &; endlocal
 if not exist q && if exist ls &; if %msds%==0 if %fcs%==0 |; if not exist name1 if not exist ext1 if not exist x if not exist file if not exist size || echo && if exist s && if not exist w && echo
-if not exist q && if exist ls &; if %msds%==0 && if %fcs%==0 && echo
-if not exist q && if not exist ls && if exist file && if not exist size && if not exist maxfiles && if not exist maxbyte && if not exist b && if not exist w &; if not exist x && if not exist y && echo && if exist s && echo ! if exist x && if not exist s && if not exist y && echo
+if not exist q && if exist ls &; if not exist name1 if not exist ext1 if not exist x if not exist file if not exist size || if not exist s && if not exist w && echo
+if not exist q && if not exist ls && if exist file && if not exist size && if not exist maxfiles && if not exist maxbyte && if not exist b && if not exist w &; if exist x && if not exist s && if not exist y && echo ! if not exist x && if not exist y && if not exist s && if not exist dir && echo
 if exist q && goto :filemsg
-if not %b%==/b && if not exist s && if not exist y && if not exist dir && if not %w:~0,2%==/w &; echo ! if exist ls && if not exist x && echo
+if not exist file && if not %b%==/b && if not exist s && if not exist y && if not exist dir && if not %w:~0,2%==/w &; echo
 if not exist file && if not exist f && if not %b%==/b && if not exist s && if not exist y && if not exist dir && if %lfcs%==0 && if %lmsds%==0 && echo
 if not exist file && if not exist f && if not %b%==/b && if not exist a && if exist s && if not exist dir && if not exist y && if %lfcs%==0 && if %lmsds%==0 && echo
 if exist maxfiles && if exist s && echo && if exist w && echo
@@ -2077,6 +2006,7 @@ if exist w && if not %b%==/b && if %ls%==/ls && if not %e%==/e && if %sdsk%>=1 &
 if not %b%==/b && if not exist msds && set msds=0 && if not exist sdsm && set sdsm=0 && if not exist sdsk && set sdsk=0
 ## Changed 'Subdirectories:' in 'dir(s):' to make space
 if not %b%==/b && if %fcs:~0,1%==0 && if %msds:~0,1%==0 && if %sdsm%==0 && if %sdsk%==0 && echo No files or (sub)directories found
+if not %b%==/b && if %fcs:~0,1%==0 && if %msds:~0,1%==0 && if not exist sdsm && if not exist sdsk && echo No files or (sub)directories found
 if not exist w && if not %b%==/b && call :fatdev "%source%"
 if exist freeKB && if %freeKB%>=1000 && call :thousandseparator "%freeKB%" "," &; if exist result && set freeKB=%result% && set result=
 if exist totalKB && if %totalKB%>=1000 && call :thousandseparator "%totalKB%" "," &; if exist result && set totalKB=%result% && set result=
@@ -2086,6 +2016,7 @@ if not %fcs%==0 && if not %msds==0 && if not exist w && if not %b%==/b && if exi
 %status:~0,7%
 if "%status:~22,3%"=="off" &; %status:~11,14% &; %status:~29%
 if "%status:~22,2%"=="on" &; %status:~11,13% &; %status:~28%
-delmod -l fat > nul && delmod fat > nul
+if not %INSMOD%==fat && delmod -l fat > nul && delmod fat > nul
 debug msg=3
-set * && set "source=%source%" && set file1=%file1%
+endlocal && set result=%result% && set "source=%source%" && set "file1=%file1%"
+goto :eof
