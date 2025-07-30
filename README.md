@@ -1,4 +1,4 @@
-## FATLSDIR.G4B v0.1 (20241009)
+## FATLSDIR.G4B v0.2 (20250730)
 
 <pre><code>Functions: front-end for Grubutil 'FAT' function 'dir' or for 'ls'  
 FATLSDIR.G4B [--mdbase=sector] [DEVICE][/PATH/][FILE] switches  
@@ -98,10 +98,23 @@ Example FATLSDIR.G4B (hd0,0) /maxbyte:64m /s
 Example FATLSDIR.G4B (hd0,0)/WINDOWS/ /size:0 /s /lfn</code></pre>    
 
 ### HISTORY
+Version 0.2  
+BUG: overshoot with switch /maxbyte:n is NOT fixed! (as such harmless - substract filesize of last shown file)  
+NEW: test if exist name-part with PATH/ FILE on command-line  
+NEW: FAT not unloaded afterwards if already loaded with insmod  
+NEW: entire script runs in setlocal/ endlocal  
+NEW: check for Grub4dos version >=20170505  
+IMPROVED: alignment of empty-line echos  
+IMPROVED: message if root is empty  
+BUGFIX: double source-echo without DEVICE on root AND without /s  
+BUGFIX: problems if Grub4dos operators in filenames on root  
+BUGFIX: problems with switch /sfn:@ if Grub4dos operators in filenames on disk/ command-line  
+
 Version 0.1  
-First published version
+First published version  
 
 ### SCREENSHOTS
+![TEXTSTAT G4B FATLSDIR G4B](https://github.com/user-attachments/assets/0b0c08dd-3bac-49fb-9d06-e5f50f27f8cb)
 
 FAT and ls directory parsing on ROOT (switch /lfn needed on fat only)
 
